@@ -40,13 +40,16 @@ class Settings:
     model_filename: str = "model.joblib"
     top_k: int = 3
 
-    # --- triage thresholds (set for real during calibration) --------------
+    # --- triage thresholds -------------------------------------------------
     # Below `escalate_threshold` we never assert an intent; we ask or hand off.
+    # Values below were measured in M2 (reports/m2_calibration.json), on the
+    # val split, targeting >=0.95 precision on auto-answered traffic.
+    # The model artifact carries its own copy; that one wins at load time.
     escalate_threshold: float = 0.40
 
     # At or above `auto_route_threshold` we answer without a human, but only
     # if the top-1/top-2 margin is at least `min_margin`.
-    auto_route_threshold: float = 0.55
+    auto_route_threshold: float = 0.54
     min_margin: float = 0.10
 
     # --- exchange-rate tool ----------------------------------------------

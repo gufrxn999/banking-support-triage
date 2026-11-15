@@ -8,8 +8,8 @@ outcomes is correct.
 The classifier is a routing signal, not the product. It never writes prose, never
 invents policy, and never claims an intent it is not confident about.
 
-**Status: in progress.** M0–M1 are done and measured (below). The LangGraph
-workflow and HTTP API are next.
+**Status: in progress.** M0–M2 are done and measured (below). The FAQ store,
+Frankfurter client, LangGraph workflow, and HTTP API are next.
 
 ---
 
@@ -44,6 +44,44 @@ Two findings worth stating plainly:
 - **The `C` grid was extended** because the first pass selected `C=8`, the edge of the
   grid. Re-running with `C ∈ {8, 16, 32}` found an interior optimum at 16. A boundary
   pick is not a tuned hyperparameter.
+
+## Decision policy (M2)
+
+Accuracy is not the product; the routing decision is. M2 refits the selected model on
+train+val (9,002 messages), freezes thresholds chosen on val, and scores test once.
+Evidence: [`reports/m2_calibration.json`](reports/m2_calibration.json).
+
+| Serving model (v2, fit on train+val) | Value |
+|---|---|
+| Test accuracy | 0.8990 |
+| Test macro-F1 | 0.8992 |
+| Test ECE (10-bin) | 0.0817 |
+| **Auto-routed at ≥0.95 precision** | **2,220 / 3,080 = 72.1%** |
+| **Precision on auto-routed traffic** | **0.9622** |
+
+Thresholds: `confidence ≥ 0.54` **and** `top1 − top2 ≥ 0.10`, with fraud and dispute
+intents excluded regardless of confidence. That is the headline claim:
+
+> auto-resolves 72.1% of test traffic at 96.2% precision, escalating the remaining 27.9%
+
+**Calibration was tested and rejected.** Sigmoid calibration (per-class OvR, as
+`CalibratedClassifierCV` implements it for multiclass) made things substantially worse
+on val — ECE 0.2194 vs 0.0825 raw, NLL 0.6466 vs 0.4925:
+
+| Val | ECE | Brier | NLL | Mean confidence |
+|---|---|---|---|---|
+| Raw multinomial | **0.0825** | **0.1938** | **0.4925** | 0.794 |
+| Sigmoid-calibrated | 0.2194 | 0.2561 | 0.6466 | 0.653 |
+
+A 77-class multinomial logistic regression is already reasonably calibrated; wrapping
+it in per-class one-vs-rest sigmoid calibration destroys the multinomial structure.
+The measured winner ships, and the artifact records `calibrated: false` so nobody has
+to guess.
+
+**The safety rules have a measurable cost**, and it is worth stating: at the same 0.95
+precision target, ignoring `NEVER_AUTO_ANSWER_INTENTS` would raise val coverage from
+67.5% to 83.3%. We give up ~16 points of automation so that a fraud report never gets
+an automated answer.
 
 ## What it does
 
@@ -127,17 +165,17 @@ artifact is gitignored — it is reproducible from the two commands above.
 | Milestone | Status |
 |---|---|
 | M0 — scaffold, contracts, licensing | done |
-| M1 — data protocol, baseline classifier | done — 0.8926 test macro-F1 |
-| M2 — calibration, auto-route thresholds | next |
-| M3 — curated FAQ store, Frankfurter client | planned |
+| M1 — data protocol, baseline classifier | done — 0.8926 test macro-F1 (fit on train) |
+| M2 — calibration, auto-route thresholds | done — 72.1% routed at 96.2% precision |
+| M3 — curated FAQ store, Frankfurter client | next |
 | M4 — LangGraph workflow + clarification turns | planned |
 | M5 — FastAPI surface (`/triage`, `/healthz`, `/model`) | planned |
 | M6 — evaluation harness (routing, tool calls, latency) | planned |
 | M7 — CI, Docker, Streamlit demo | planned |
 
-Headline number the project exists to produce: **deflection rate at a stated
-precision** — e.g. "auto-resolves 79% of traffic at ≥0.95 precision". Everything else
-in the metrics table exists to prove that number is trustworthy.
+Headline number the project exists to produce is now measured: **deflection rate at a
+stated precision**. Everything else in the metrics table exists to prove that number is
+trustworthy.
 
 ## Scope
 

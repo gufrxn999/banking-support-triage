@@ -23,7 +23,11 @@ def test_artifact_metadata_is_complete(model: IntentClassifier) -> None:
     assert model.n_intents == 77
     assert model.metadata["model_version"]
     assert "test_macro_f1" in model.metadata["metrics"]
-    assert model.metadata["trained_on"] == "train"
+    # v1 fits on train; v2 refits on train+val after threshold selection
+    assert model.metadata["trained_on"] in {"train", "train+val"}
+    thresholds = model.metadata["thresholds"]
+    assert 0 < thresholds["auto_route_threshold"] <= 1
+    assert 0 <= thresholds["min_margin"] < 1
 
 
 def test_predictions_are_probability_distributions(model: IntentClassifier) -> None:

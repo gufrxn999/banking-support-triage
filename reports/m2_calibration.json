@@ -1,0 +1,2723 @@
+{
+  "generated_at": "2026-11-15T18:57:40+00:00",
+  "protocol": {
+    "calibration_comparison": "val split",
+    "threshold_selection": "val split, target precision 0.95, minimum 40 routed",
+    "headline": "official test split, scored once, thresholds frozen"
+  },
+  "selected_from_m1": {
+    "config": "word_unigram",
+    "C": 16.0,
+    "basis": "cv_macro_f1_mean"
+  },
+  "calibration_comparison": {
+    "raw": {
+      "ece": 0.0825,
+      "brier": 0.1938,
+      "nll": 0.4925,
+      "mean_confidence": 0.7945,
+      "accuracy": 0.877,
+      "bins": [
+        {
+          "bin": "0.0-0.1",
+          "count": 8,
+          "mean_confidence": 0.0887,
+          "accuracy": 0.75
+        },
+        {
+          "bin": "0.1-0.2",
+          "count": 34,
+          "mean_confidence": 0.1502,
+          "accuracy": 0.1765
+        },
+        {
+          "bin": "0.2-0.3",
+          "count": 69,
+          "mean_confidence": 0.2535,
+          "accuracy": 0.4058
+        },
+        {
+          "bin": "0.3-0.4",
+          "count": 91,
+          "mean_confidence": 0.3517,
+          "accuracy": 0.5165
+        },
+        {
+          "bin": "0.4-0.5",
+          "count": 96,
+          "mean_confidence": 0.4429,
+          "accuracy": 0.625
+        },
+        {
+          "bin": "0.5-0.6",
+          "count": 100,
+          "mean_confidence": 0.5563,
+          "accuracy": 0.75
+        },
+        {
+          "bin": "0.6-0.7",
+          "count": 135,
+          "mean_confidence": 0.6511,
+          "accuracy": 0.8074
+        },
+        {
+          "bin": "0.7-0.8",
+          "count": 176,
+          "mean_confidence": 0.7506,
+          "accuracy": 0.892
+        },
+        {
+          "bin": "0.8-0.9",
+          "count": 286,
+          "mean_confidence": 0.8532,
+          "accuracy": 0.9441
+        },
+        {
+          "bin": "0.9-1.0",
+          "count": 1005,
+          "mean_confidence": 0.9668,
+          "accuracy": 0.991
+        }
+      ]
+    },
+    "calibrated": {
+      "ece": 0.2194,
+      "brier": 0.2561,
+      "nll": 0.6466,
+      "mean_confidence": 0.6526,
+      "accuracy": 0.872,
+      "bins": [
+        {
+          "bin": "0.0-0.1",
+          "count": 0,
+          "mean_confidence": null,
+          "accuracy": null
+        },
+        {
+          "bin": "0.1-0.2",
+          "count": 44,
+          "mean_confidence": 0.1582,
+          "accuracy": 0.3409
+        },
+        {
+          "bin": "0.2-0.3",
+          "count": 80,
+          "mean_confidence": 0.2537,
+          "accuracy": 0.4625
+        },
+        {
+          "bin": "0.3-0.4",
+          "count": 163,
+          "mean_confidence": 0.3584,
+          "accuracy": 0.5583
+        },
+        {
+          "bin": "0.4-0.5",
+          "count": 210,
+          "mean_confidence": 0.4518,
+          "accuracy": 0.7095
+        },
+        {
+          "bin": "0.5-0.6",
+          "count": 260,
+          "mean_confidence": 0.5529,
+          "accuracy": 0.8923
+        },
+        {
+          "bin": "0.6-0.7",
+          "count": 280,
+          "mean_confidence": 0.6527,
+          "accuracy": 0.9607
+        },
+        {
+          "bin": "0.7-0.8",
+          "count": 366,
+          "mean_confidence": 0.7523,
+          "accuracy": 0.9727
+        },
+        {
+          "bin": "0.8-0.9",
+          "count": 395,
+          "mean_confidence": 0.8516,
+          "accuracy": 0.9949
+        },
+        {
+          "bin": "0.9-1.0",
+          "count": 202,
+          "mean_confidence": 0.9226,
+          "accuracy": 1.0
+        }
+      ]
+    }
+  },
+  "winner": "raw",
+  "thresholds": {
+    "auto_route_threshold": 0.54,
+    "min_margin": 0.1,
+    "escalate_threshold": 0.4,
+    "target_precision": 0.95,
+    "calibrated": false
+  },
+  "val_at_chosen_threshold": {
+    "tau": 0.54,
+    "margin": 0.1,
+    "policy": "with_safety_rules",
+    "routed": 1350,
+    "coverage": 0.675,
+    "precision": 0.9511
+  },
+  "confidence_only_comparison": {
+    "tau": 0.54,
+    "margin": 0.1,
+    "policy": "confidence_only",
+    "routed": 1665,
+    "coverage": 0.8325,
+    "precision": 0.9502
+  },
+  "deflection_on_test": {
+    "routed": 2220,
+    "n": 3080,
+    "coverage": 0.7208,
+    "precision": 0.9622
+  },
+  "test_scores": {
+    "accuracy": 0.899,
+    "macro_f1": 0.8992
+  },
+  "test_diagnostics": {
+    "ece": 0.0817,
+    "brier": 0.1636,
+    "nll": 0.4261,
+    "mean_confidence": 0.8174,
+    "accuracy": 0.899,
+    "bins": [
+      {
+        "bin": "0.0-0.1",
+        "count": 3,
+        "mean_confidence": 0.0828,
+        "accuracy": 0.3333
+      },
+      {
+        "bin": "0.1-0.2",
+        "count": 42,
+        "mean_confidence": 0.1615,
+        "accuracy": 0.4048
+      },
+      {
+        "bin": "0.2-0.3",
+        "count": 81,
+        "mean_confidence": 0.2504,
+        "accuracy": 0.3951
+      },
+      {
+        "bin": "0.3-0.4",
+        "count": 110,
+        "mean_confidence": 0.3521,
+        "accuracy": 0.4727
+      },
+      {
+        "bin": "0.4-0.5",
+        "count": 148,
+        "mean_confidence": 0.4528,
+        "accuracy": 0.6216
+      },
+      {
+        "bin": "0.5-0.6",
+        "count": 163,
+        "mean_confidence": 0.5507,
+        "accuracy": 0.7301
+      },
+      {
+        "bin": "0.6-0.7",
+        "count": 185,
+        "mean_confidence": 0.6517,
+        "accuracy": 0.8757
+      },
+      {
+        "bin": "0.7-0.8",
+        "count": 242,
+        "mean_confidence": 0.7562,
+        "accuracy": 0.9091
+      },
+      {
+        "bin": "0.8-0.9",
+        "count": 429,
+        "mean_confidence": 0.8544,
+        "accuracy": 0.9604
+      },
+      {
+        "bin": "0.9-1.0",
+        "count": 1677,
+        "mean_confidence": 0.9687,
+        "accuracy": 0.9911
+      }
+    ]
+  },
+  "sweep": [
+    {
+      "tau": 0.2,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1588,
+      "coverage": 0.794,
+      "precision": 0.8923
+    },
+    {
+      "tau": 0.2,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1958,
+      "coverage": 0.979,
+      "precision": 0.8897
+    },
+    {
+      "tau": 0.2,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1554,
+      "coverage": 0.777,
+      "precision": 0.9015
+    },
+    {
+      "tau": 0.2,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1919,
+      "coverage": 0.9595,
+      "precision": 0.8984
+    },
+    {
+      "tau": 0.2,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1520,
+      "coverage": 0.76,
+      "precision": 0.9105
+    },
+    {
+      "tau": 0.2,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1877,
+      "coverage": 0.9385,
+      "precision": 0.9078
+    },
+    {
+      "tau": 0.2,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1442,
+      "coverage": 0.721,
+      "precision": 0.9348
+    },
+    {
+      "tau": 0.2,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1783,
+      "coverage": 0.8915,
+      "precision": 0.931
+    },
+    {
+      "tau": 0.22,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1577,
+      "coverage": 0.7885,
+      "precision": 0.896
+    },
+    {
+      "tau": 0.22,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1944,
+      "coverage": 0.972,
+      "precision": 0.893
+    },
+    {
+      "tau": 0.22,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1549,
+      "coverage": 0.7745,
+      "precision": 0.9025
+    },
+    {
+      "tau": 0.22,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1912,
+      "coverage": 0.956,
+      "precision": 0.8996
+    },
+    {
+      "tau": 0.22,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1517,
+      "coverage": 0.7585,
+      "precision": 0.911
+    },
+    {
+      "tau": 0.22,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1873,
+      "coverage": 0.9365,
+      "precision": 0.9082
+    },
+    {
+      "tau": 0.22,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1442,
+      "coverage": 0.721,
+      "precision": 0.9348
+    },
+    {
+      "tau": 0.22,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1783,
+      "coverage": 0.8915,
+      "precision": 0.931
+    },
+    {
+      "tau": 0.24,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1567,
+      "coverage": 0.7835,
+      "precision": 0.8979
+    },
+    {
+      "tau": 0.24,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1932,
+      "coverage": 0.966,
+      "precision": 0.8944
+    },
+    {
+      "tau": 0.24,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1542,
+      "coverage": 0.771,
+      "precision": 0.904
+    },
+    {
+      "tau": 0.24,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1903,
+      "coverage": 0.9515,
+      "precision": 0.9007
+    },
+    {
+      "tau": 0.24,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1512,
+      "coverage": 0.756,
+      "precision": 0.9127
+    },
+    {
+      "tau": 0.24,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1867,
+      "coverage": 0.9335,
+      "precision": 0.9095
+    },
+    {
+      "tau": 0.24,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1442,
+      "coverage": 0.721,
+      "precision": 0.9348
+    },
+    {
+      "tau": 0.24,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1783,
+      "coverage": 0.8915,
+      "precision": 0.931
+    },
+    {
+      "tau": 0.26,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1560,
+      "coverage": 0.78,
+      "precision": 0.9013
+    },
+    {
+      "tau": 0.26,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1923,
+      "coverage": 0.9615,
+      "precision": 0.8981
+    },
+    {
+      "tau": 0.26,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1538,
+      "coverage": 0.769,
+      "precision": 0.9064
+    },
+    {
+      "tau": 0.26,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1897,
+      "coverage": 0.9485,
+      "precision": 0.9035
+    },
+    {
+      "tau": 0.26,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1509,
+      "coverage": 0.7545,
+      "precision": 0.9145
+    },
+    {
+      "tau": 0.26,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1863,
+      "coverage": 0.9315,
+      "precision": 0.9114
+    },
+    {
+      "tau": 0.26,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1441,
+      "coverage": 0.7205,
+      "precision": 0.9355
+    },
+    {
+      "tau": 0.26,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1782,
+      "coverage": 0.891,
+      "precision": 0.9315
+    },
+    {
+      "tau": 0.28,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1546,
+      "coverage": 0.773,
+      "precision": 0.9056
+    },
+    {
+      "tau": 0.28,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1905,
+      "coverage": 0.9525,
+      "precision": 0.9029
+    },
+    {
+      "tau": 0.28,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1527,
+      "coverage": 0.7635,
+      "precision": 0.9096
+    },
+    {
+      "tau": 0.28,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1883,
+      "coverage": 0.9415,
+      "precision": 0.9071
+    },
+    {
+      "tau": 0.28,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1501,
+      "coverage": 0.7505,
+      "precision": 0.9181
+    },
+    {
+      "tau": 0.28,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1852,
+      "coverage": 0.926,
+      "precision": 0.9152
+    },
+    {
+      "tau": 0.28,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1441,
+      "coverage": 0.7205,
+      "precision": 0.9355
+    },
+    {
+      "tau": 0.28,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1782,
+      "coverage": 0.891,
+      "precision": 0.9315
+    },
+    {
+      "tau": 0.3,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1531,
+      "coverage": 0.7655,
+      "precision": 0.9105
+    },
+    {
+      "tau": 0.3,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1889,
+      "coverage": 0.9445,
+      "precision": 0.9074
+    },
+    {
+      "tau": 0.3,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1516,
+      "coverage": 0.758,
+      "precision": 0.9142
+    },
+    {
+      "tau": 0.3,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1872,
+      "coverage": 0.936,
+      "precision": 0.9108
+    },
+    {
+      "tau": 0.3,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1497,
+      "coverage": 0.7485,
+      "precision": 0.9205
+    },
+    {
+      "tau": 0.3,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1848,
+      "coverage": 0.924,
+      "precision": 0.9172
+    },
+    {
+      "tau": 0.3,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1441,
+      "coverage": 0.7205,
+      "precision": 0.9355
+    },
+    {
+      "tau": 0.3,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1782,
+      "coverage": 0.891,
+      "precision": 0.9315
+    },
+    {
+      "tau": 0.32,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1515,
+      "coverage": 0.7575,
+      "precision": 0.9155
+    },
+    {
+      "tau": 0.32,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1870,
+      "coverage": 0.935,
+      "precision": 0.9123
+    },
+    {
+      "tau": 0.32,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1502,
+      "coverage": 0.751,
+      "precision": 0.9188
+    },
+    {
+      "tau": 0.32,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1856,
+      "coverage": 0.928,
+      "precision": 0.9149
+    },
+    {
+      "tau": 0.32,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1486,
+      "coverage": 0.743,
+      "precision": 0.9246
+    },
+    {
+      "tau": 0.32,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1835,
+      "coverage": 0.9175,
+      "precision": 0.921
+    },
+    {
+      "tau": 0.32,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1440,
+      "coverage": 0.72,
+      "precision": 0.9361
+    },
+    {
+      "tau": 0.32,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1781,
+      "coverage": 0.8905,
+      "precision": 0.9321
+    },
+    {
+      "tau": 0.34,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1500,
+      "coverage": 0.75,
+      "precision": 0.92
+    },
+    {
+      "tau": 0.34,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1853,
+      "coverage": 0.9265,
+      "precision": 0.9164
+    },
+    {
+      "tau": 0.34,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1489,
+      "coverage": 0.7445,
+      "precision": 0.9228
+    },
+    {
+      "tau": 0.34,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1841,
+      "coverage": 0.9205,
+      "precision": 0.9185
+    },
+    {
+      "tau": 0.34,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1474,
+      "coverage": 0.737,
+      "precision": 0.9281
+    },
+    {
+      "tau": 0.34,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1821,
+      "coverage": 0.9105,
+      "precision": 0.9242
+    },
+    {
+      "tau": 0.34,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1434,
+      "coverage": 0.717,
+      "precision": 0.9379
+    },
+    {
+      "tau": 0.34,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1774,
+      "coverage": 0.887,
+      "precision": 0.934
+    },
+    {
+      "tau": 0.36,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1492,
+      "coverage": 0.746,
+      "precision": 0.9216
+    },
+    {
+      "tau": 0.36,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1838,
+      "coverage": 0.919,
+      "precision": 0.9189
+    },
+    {
+      "tau": 0.36,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1481,
+      "coverage": 0.7405,
+      "precision": 0.9244
+    },
+    {
+      "tau": 0.36,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1827,
+      "coverage": 0.9135,
+      "precision": 0.9212
+    },
+    {
+      "tau": 0.36,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1467,
+      "coverage": 0.7335,
+      "precision": 0.9291
+    },
+    {
+      "tau": 0.36,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1809,
+      "coverage": 0.9045,
+      "precision": 0.9265
+    },
+    {
+      "tau": 0.36,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1429,
+      "coverage": 0.7145,
+      "precision": 0.9384
+    },
+    {
+      "tau": 0.36,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1766,
+      "coverage": 0.883,
+      "precision": 0.9354
+    },
+    {
+      "tau": 0.38,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1472,
+      "coverage": 0.736,
+      "precision": 0.926
+    },
+    {
+      "tau": 0.38,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1817,
+      "coverage": 0.9085,
+      "precision": 0.9229
+    },
+    {
+      "tau": 0.38,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1466,
+      "coverage": 0.733,
+      "precision": 0.9284
+    },
+    {
+      "tau": 0.38,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1811,
+      "coverage": 0.9055,
+      "precision": 0.9249
+    },
+    {
+      "tau": 0.38,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1455,
+      "coverage": 0.7275,
+      "precision": 0.932
+    },
+    {
+      "tau": 0.38,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1796,
+      "coverage": 0.898,
+      "precision": 0.9293
+    },
+    {
+      "tau": 0.38,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1419,
+      "coverage": 0.7095,
+      "precision": 0.9401
+    },
+    {
+      "tau": 0.38,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1755,
+      "coverage": 0.8775,
+      "precision": 0.9373
+    },
+    {
+      "tau": 0.4,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1458,
+      "coverage": 0.729,
+      "precision": 0.9294
+    },
+    {
+      "tau": 0.4,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1798,
+      "coverage": 0.899,
+      "precision": 0.9271
+    },
+    {
+      "tau": 0.4,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1454,
+      "coverage": 0.727,
+      "precision": 0.9305
+    },
+    {
+      "tau": 0.4,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1794,
+      "coverage": 0.897,
+      "precision": 0.9281
+    },
+    {
+      "tau": 0.4,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1445,
+      "coverage": 0.7225,
+      "precision": 0.9329
+    },
+    {
+      "tau": 0.4,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1782,
+      "coverage": 0.891,
+      "precision": 0.9315
+    },
+    {
+      "tau": 0.4,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1414,
+      "coverage": 0.707,
+      "precision": 0.9399
+    },
+    {
+      "tau": 0.4,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1747,
+      "coverage": 0.8735,
+      "precision": 0.9382
+    },
+    {
+      "tau": 0.42,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1439,
+      "coverage": 0.7195,
+      "precision": 0.9347
+    },
+    {
+      "tau": 0.42,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1774,
+      "coverage": 0.887,
+      "precision": 0.9329
+    },
+    {
+      "tau": 0.42,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1436,
+      "coverage": 0.718,
+      "precision": 0.9352
+    },
+    {
+      "tau": 0.42,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1771,
+      "coverage": 0.8855,
+      "precision": 0.9334
+    },
+    {
+      "tau": 0.42,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1430,
+      "coverage": 0.715,
+      "precision": 0.9364
+    },
+    {
+      "tau": 0.42,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1763,
+      "coverage": 0.8815,
+      "precision": 0.9353
+    },
+    {
+      "tau": 0.42,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1406,
+      "coverage": 0.703,
+      "precision": 0.9417
+    },
+    {
+      "tau": 0.42,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1737,
+      "coverage": 0.8685,
+      "precision": 0.9396
+    },
+    {
+      "tau": 0.44,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1419,
+      "coverage": 0.7095,
+      "precision": 0.9373
+    },
+    {
+      "tau": 0.44,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1752,
+      "coverage": 0.876,
+      "precision": 0.9361
+    },
+    {
+      "tau": 0.44,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1417,
+      "coverage": 0.7085,
+      "precision": 0.9379
+    },
+    {
+      "tau": 0.44,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1750,
+      "coverage": 0.875,
+      "precision": 0.9366
+    },
+    {
+      "tau": 0.44,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1413,
+      "coverage": 0.7065,
+      "precision": 0.9391
+    },
+    {
+      "tau": 0.44,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1744,
+      "coverage": 0.872,
+      "precision": 0.9386
+    },
+    {
+      "tau": 0.44,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1395,
+      "coverage": 0.6975,
+      "precision": 0.9434
+    },
+    {
+      "tau": 0.44,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1724,
+      "coverage": 0.862,
+      "precision": 0.942
+    },
+    {
+      "tau": 0.46,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1396,
+      "coverage": 0.698,
+      "precision": 0.942
+    },
+    {
+      "tau": 0.46,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1726,
+      "coverage": 0.863,
+      "precision": 0.9403
+    },
+    {
+      "tau": 0.46,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1396,
+      "coverage": 0.698,
+      "precision": 0.942
+    },
+    {
+      "tau": 0.46,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1726,
+      "coverage": 0.863,
+      "precision": 0.9403
+    },
+    {
+      "tau": 0.46,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1393,
+      "coverage": 0.6965,
+      "precision": 0.9433
+    },
+    {
+      "tau": 0.46,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1722,
+      "coverage": 0.861,
+      "precision": 0.9419
+    },
+    {
+      "tau": 0.46,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1380,
+      "coverage": 0.69,
+      "precision": 0.9464
+    },
+    {
+      "tau": 0.46,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1708,
+      "coverage": 0.854,
+      "precision": 0.9444
+    },
+    {
+      "tau": 0.48,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1387,
+      "coverage": 0.6935,
+      "precision": 0.9438
+    },
+    {
+      "tau": 0.48,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1714,
+      "coverage": 0.857,
+      "precision": 0.9417
+    },
+    {
+      "tau": 0.48,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1387,
+      "coverage": 0.6935,
+      "precision": 0.9438
+    },
+    {
+      "tau": 0.48,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1714,
+      "coverage": 0.857,
+      "precision": 0.9417
+    },
+    {
+      "tau": 0.48,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1384,
+      "coverage": 0.692,
+      "precision": 0.9451
+    },
+    {
+      "tau": 0.48,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1710,
+      "coverage": 0.855,
+      "precision": 0.9433
+    },
+    {
+      "tau": 0.48,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1375,
+      "coverage": 0.6875,
+      "precision": 0.9469
+    },
+    {
+      "tau": 0.48,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1700,
+      "coverage": 0.85,
+      "precision": 0.9447
+    },
+    {
+      "tau": 0.5,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1377,
+      "coverage": 0.6885,
+      "precision": 0.9463
+    },
+    {
+      "tau": 0.5,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1702,
+      "coverage": 0.851,
+      "precision": 0.9442
+    },
+    {
+      "tau": 0.5,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1377,
+      "coverage": 0.6885,
+      "precision": 0.9463
+    },
+    {
+      "tau": 0.5,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1702,
+      "coverage": 0.851,
+      "precision": 0.9442
+    },
+    {
+      "tau": 0.5,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1377,
+      "coverage": 0.6885,
+      "precision": 0.9463
+    },
+    {
+      "tau": 0.5,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1701,
+      "coverage": 0.8505,
+      "precision": 0.9447
+    },
+    {
+      "tau": 0.5,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1369,
+      "coverage": 0.6845,
+      "precision": 0.9481
+    },
+    {
+      "tau": 0.5,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1693,
+      "coverage": 0.8465,
+      "precision": 0.9462
+    },
+    {
+      "tau": 0.52,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1363,
+      "coverage": 0.6815,
+      "precision": 0.9486
+    },
+    {
+      "tau": 0.52,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1686,
+      "coverage": 0.843,
+      "precision": 0.9472
+    },
+    {
+      "tau": 0.52,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1363,
+      "coverage": 0.6815,
+      "precision": 0.9486
+    },
+    {
+      "tau": 0.52,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1686,
+      "coverage": 0.843,
+      "precision": 0.9472
+    },
+    {
+      "tau": 0.52,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1363,
+      "coverage": 0.6815,
+      "precision": 0.9486
+    },
+    {
+      "tau": 0.52,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1686,
+      "coverage": 0.843,
+      "precision": 0.9472
+    },
+    {
+      "tau": 0.52,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1358,
+      "coverage": 0.679,
+      "precision": 0.9499
+    },
+    {
+      "tau": 0.52,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1681,
+      "coverage": 0.8405,
+      "precision": 0.9482
+    },
+    {
+      "tau": 0.54,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1350,
+      "coverage": 0.675,
+      "precision": 0.9511
+    },
+    {
+      "tau": 0.54,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1665,
+      "coverage": 0.8325,
+      "precision": 0.9502
+    },
+    {
+      "tau": 0.54,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1350,
+      "coverage": 0.675,
+      "precision": 0.9511
+    },
+    {
+      "tau": 0.54,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1665,
+      "coverage": 0.8325,
+      "precision": 0.9502
+    },
+    {
+      "tau": 0.54,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1350,
+      "coverage": 0.675,
+      "precision": 0.9511
+    },
+    {
+      "tau": 0.54,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1665,
+      "coverage": 0.8325,
+      "precision": 0.9502
+    },
+    {
+      "tau": 0.54,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1348,
+      "coverage": 0.674,
+      "precision": 0.9525
+    },
+    {
+      "tau": 0.54,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1663,
+      "coverage": 0.8315,
+      "precision": 0.9513
+    },
+    {
+      "tau": 0.56,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1335,
+      "coverage": 0.6675,
+      "precision": 0.9543
+    },
+    {
+      "tau": 0.56,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1648,
+      "coverage": 0.824,
+      "precision": 0.9527
+    },
+    {
+      "tau": 0.56,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1335,
+      "coverage": 0.6675,
+      "precision": 0.9543
+    },
+    {
+      "tau": 0.56,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1648,
+      "coverage": 0.824,
+      "precision": 0.9527
+    },
+    {
+      "tau": 0.56,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1335,
+      "coverage": 0.6675,
+      "precision": 0.9543
+    },
+    {
+      "tau": 0.56,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1648,
+      "coverage": 0.824,
+      "precision": 0.9527
+    },
+    {
+      "tau": 0.56,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1335,
+      "coverage": 0.6675,
+      "precision": 0.9543
+    },
+    {
+      "tau": 0.56,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1648,
+      "coverage": 0.824,
+      "precision": 0.9527
+    },
+    {
+      "tau": 0.58,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1323,
+      "coverage": 0.6615,
+      "precision": 0.9562
+    },
+    {
+      "tau": 0.58,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1634,
+      "coverage": 0.817,
+      "precision": 0.9553
+    },
+    {
+      "tau": 0.58,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1323,
+      "coverage": 0.6615,
+      "precision": 0.9562
+    },
+    {
+      "tau": 0.58,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1634,
+      "coverage": 0.817,
+      "precision": 0.9553
+    },
+    {
+      "tau": 0.58,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1323,
+      "coverage": 0.6615,
+      "precision": 0.9562
+    },
+    {
+      "tau": 0.58,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1634,
+      "coverage": 0.817,
+      "precision": 0.9553
+    },
+    {
+      "tau": 0.58,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1323,
+      "coverage": 0.6615,
+      "precision": 0.9562
+    },
+    {
+      "tau": 0.58,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1634,
+      "coverage": 0.817,
+      "precision": 0.9553
+    },
+    {
+      "tau": 0.6,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1297,
+      "coverage": 0.6485,
+      "precision": 0.9576
+    },
+    {
+      "tau": 0.6,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1602,
+      "coverage": 0.801,
+      "precision": 0.9563
+    },
+    {
+      "tau": 0.6,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1297,
+      "coverage": 0.6485,
+      "precision": 0.9576
+    },
+    {
+      "tau": 0.6,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1602,
+      "coverage": 0.801,
+      "precision": 0.9563
+    },
+    {
+      "tau": 0.6,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1297,
+      "coverage": 0.6485,
+      "precision": 0.9576
+    },
+    {
+      "tau": 0.6,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1602,
+      "coverage": 0.801,
+      "precision": 0.9563
+    },
+    {
+      "tau": 0.6,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1297,
+      "coverage": 0.6485,
+      "precision": 0.9576
+    },
+    {
+      "tau": 0.6,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1602,
+      "coverage": 0.801,
+      "precision": 0.9563
+    },
+    {
+      "tau": 0.62,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1276,
+      "coverage": 0.638,
+      "precision": 0.9639
+    },
+    {
+      "tau": 0.62,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1575,
+      "coverage": 0.7875,
+      "precision": 0.9619
+    },
+    {
+      "tau": 0.62,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1276,
+      "coverage": 0.638,
+      "precision": 0.9639
+    },
+    {
+      "tau": 0.62,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1575,
+      "coverage": 0.7875,
+      "precision": 0.9619
+    },
+    {
+      "tau": 0.62,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1276,
+      "coverage": 0.638,
+      "precision": 0.9639
+    },
+    {
+      "tau": 0.62,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1575,
+      "coverage": 0.7875,
+      "precision": 0.9619
+    },
+    {
+      "tau": 0.62,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1276,
+      "coverage": 0.638,
+      "precision": 0.9639
+    },
+    {
+      "tau": 0.62,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1575,
+      "coverage": 0.7875,
+      "precision": 0.9619
+    },
+    {
+      "tau": 0.64,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1255,
+      "coverage": 0.6275,
+      "precision": 0.9657
+    },
+    {
+      "tau": 0.64,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1552,
+      "coverage": 0.776,
+      "precision": 0.9633
+    },
+    {
+      "tau": 0.64,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1255,
+      "coverage": 0.6275,
+      "precision": 0.9657
+    },
+    {
+      "tau": 0.64,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1552,
+      "coverage": 0.776,
+      "precision": 0.9633
+    },
+    {
+      "tau": 0.64,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1255,
+      "coverage": 0.6275,
+      "precision": 0.9657
+    },
+    {
+      "tau": 0.64,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1552,
+      "coverage": 0.776,
+      "precision": 0.9633
+    },
+    {
+      "tau": 0.64,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1255,
+      "coverage": 0.6275,
+      "precision": 0.9657
+    },
+    {
+      "tau": 0.64,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1552,
+      "coverage": 0.776,
+      "precision": 0.9633
+    },
+    {
+      "tau": 0.66,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1237,
+      "coverage": 0.6185,
+      "precision": 0.966
+    },
+    {
+      "tau": 0.66,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1526,
+      "coverage": 0.763,
+      "precision": 0.9646
+    },
+    {
+      "tau": 0.66,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1237,
+      "coverage": 0.6185,
+      "precision": 0.966
+    },
+    {
+      "tau": 0.66,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1526,
+      "coverage": 0.763,
+      "precision": 0.9646
+    },
+    {
+      "tau": 0.66,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1237,
+      "coverage": 0.6185,
+      "precision": 0.966
+    },
+    {
+      "tau": 0.66,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1526,
+      "coverage": 0.763,
+      "precision": 0.9646
+    },
+    {
+      "tau": 0.66,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1237,
+      "coverage": 0.6185,
+      "precision": 0.966
+    },
+    {
+      "tau": 0.66,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1526,
+      "coverage": 0.763,
+      "precision": 0.9646
+    },
+    {
+      "tau": 0.68,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1213,
+      "coverage": 0.6065,
+      "precision": 0.9695
+    },
+    {
+      "tau": 0.68,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1495,
+      "coverage": 0.7475,
+      "precision": 0.9692
+    },
+    {
+      "tau": 0.68,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1213,
+      "coverage": 0.6065,
+      "precision": 0.9695
+    },
+    {
+      "tau": 0.68,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1495,
+      "coverage": 0.7475,
+      "precision": 0.9692
+    },
+    {
+      "tau": 0.68,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1213,
+      "coverage": 0.6065,
+      "precision": 0.9695
+    },
+    {
+      "tau": 0.68,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1495,
+      "coverage": 0.7475,
+      "precision": 0.9692
+    },
+    {
+      "tau": 0.68,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1213,
+      "coverage": 0.6065,
+      "precision": 0.9695
+    },
+    {
+      "tau": 0.68,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1495,
+      "coverage": 0.7475,
+      "precision": 0.9692
+    },
+    {
+      "tau": 0.7,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1190,
+      "coverage": 0.595,
+      "precision": 0.9706
+    },
+    {
+      "tau": 0.7,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1467,
+      "coverage": 0.7335,
+      "precision": 0.97
+    },
+    {
+      "tau": 0.7,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1190,
+      "coverage": 0.595,
+      "precision": 0.9706
+    },
+    {
+      "tau": 0.7,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1467,
+      "coverage": 0.7335,
+      "precision": 0.97
+    },
+    {
+      "tau": 0.7,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1190,
+      "coverage": 0.595,
+      "precision": 0.9706
+    },
+    {
+      "tau": 0.7,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1467,
+      "coverage": 0.7335,
+      "precision": 0.97
+    },
+    {
+      "tau": 0.7,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1190,
+      "coverage": 0.595,
+      "precision": 0.9706
+    },
+    {
+      "tau": 0.7,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1467,
+      "coverage": 0.7335,
+      "precision": 0.97
+    },
+    {
+      "tau": 0.72,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1165,
+      "coverage": 0.5825,
+      "precision": 0.9725
+    },
+    {
+      "tau": 0.72,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1433,
+      "coverage": 0.7165,
+      "precision": 0.9728
+    },
+    {
+      "tau": 0.72,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1165,
+      "coverage": 0.5825,
+      "precision": 0.9725
+    },
+    {
+      "tau": 0.72,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1433,
+      "coverage": 0.7165,
+      "precision": 0.9728
+    },
+    {
+      "tau": 0.72,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1165,
+      "coverage": 0.5825,
+      "precision": 0.9725
+    },
+    {
+      "tau": 0.72,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1433,
+      "coverage": 0.7165,
+      "precision": 0.9728
+    },
+    {
+      "tau": 0.72,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1165,
+      "coverage": 0.5825,
+      "precision": 0.9725
+    },
+    {
+      "tau": 0.72,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1433,
+      "coverage": 0.7165,
+      "precision": 0.9728
+    },
+    {
+      "tau": 0.74,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1135,
+      "coverage": 0.5675,
+      "precision": 0.9753
+    },
+    {
+      "tau": 0.74,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1400,
+      "coverage": 0.7,
+      "precision": 0.975
+    },
+    {
+      "tau": 0.74,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1135,
+      "coverage": 0.5675,
+      "precision": 0.9753
+    },
+    {
+      "tau": 0.74,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1400,
+      "coverage": 0.7,
+      "precision": 0.975
+    },
+    {
+      "tau": 0.74,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1135,
+      "coverage": 0.5675,
+      "precision": 0.9753
+    },
+    {
+      "tau": 0.74,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1400,
+      "coverage": 0.7,
+      "precision": 0.975
+    },
+    {
+      "tau": 0.74,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1135,
+      "coverage": 0.5675,
+      "precision": 0.9753
+    },
+    {
+      "tau": 0.74,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1400,
+      "coverage": 0.7,
+      "precision": 0.975
+    },
+    {
+      "tau": 0.76,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1102,
+      "coverage": 0.551,
+      "precision": 0.9791
+    },
+    {
+      "tau": 0.76,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1362,
+      "coverage": 0.681,
+      "precision": 0.978
+    },
+    {
+      "tau": 0.76,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1102,
+      "coverage": 0.551,
+      "precision": 0.9791
+    },
+    {
+      "tau": 0.76,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1362,
+      "coverage": 0.681,
+      "precision": 0.978
+    },
+    {
+      "tau": 0.76,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1102,
+      "coverage": 0.551,
+      "precision": 0.9791
+    },
+    {
+      "tau": 0.76,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1362,
+      "coverage": 0.681,
+      "precision": 0.978
+    },
+    {
+      "tau": 0.76,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1102,
+      "coverage": 0.551,
+      "precision": 0.9791
+    },
+    {
+      "tau": 0.76,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1362,
+      "coverage": 0.681,
+      "precision": 0.978
+    },
+    {
+      "tau": 0.78,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1069,
+      "coverage": 0.5345,
+      "precision": 0.9813
+    },
+    {
+      "tau": 0.78,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1324,
+      "coverage": 0.662,
+      "precision": 0.9804
+    },
+    {
+      "tau": 0.78,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1069,
+      "coverage": 0.5345,
+      "precision": 0.9813
+    },
+    {
+      "tau": 0.78,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1324,
+      "coverage": 0.662,
+      "precision": 0.9804
+    },
+    {
+      "tau": 0.78,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1069,
+      "coverage": 0.5345,
+      "precision": 0.9813
+    },
+    {
+      "tau": 0.78,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1324,
+      "coverage": 0.662,
+      "precision": 0.9804
+    },
+    {
+      "tau": 0.78,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1069,
+      "coverage": 0.5345,
+      "precision": 0.9813
+    },
+    {
+      "tau": 0.78,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1324,
+      "coverage": 0.662,
+      "precision": 0.9804
+    },
+    {
+      "tau": 0.8,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 1039,
+      "coverage": 0.5195,
+      "precision": 0.9808
+    },
+    {
+      "tau": 0.8,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1291,
+      "coverage": 0.6455,
+      "precision": 0.9806
+    },
+    {
+      "tau": 0.8,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 1039,
+      "coverage": 0.5195,
+      "precision": 0.9808
+    },
+    {
+      "tau": 0.8,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1291,
+      "coverage": 0.6455,
+      "precision": 0.9806
+    },
+    {
+      "tau": 0.8,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 1039,
+      "coverage": 0.5195,
+      "precision": 0.9808
+    },
+    {
+      "tau": 0.8,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1291,
+      "coverage": 0.6455,
+      "precision": 0.9806
+    },
+    {
+      "tau": 0.8,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 1039,
+      "coverage": 0.5195,
+      "precision": 0.9808
+    },
+    {
+      "tau": 0.8,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1291,
+      "coverage": 0.6455,
+      "precision": 0.9806
+    },
+    {
+      "tau": 0.82,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 996,
+      "coverage": 0.498,
+      "precision": 0.9839
+    },
+    {
+      "tau": 0.82,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1241,
+      "coverage": 0.6205,
+      "precision": 0.9839
+    },
+    {
+      "tau": 0.82,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 996,
+      "coverage": 0.498,
+      "precision": 0.9839
+    },
+    {
+      "tau": 0.82,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1241,
+      "coverage": 0.6205,
+      "precision": 0.9839
+    },
+    {
+      "tau": 0.82,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 996,
+      "coverage": 0.498,
+      "precision": 0.9839
+    },
+    {
+      "tau": 0.82,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1241,
+      "coverage": 0.6205,
+      "precision": 0.9839
+    },
+    {
+      "tau": 0.82,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 996,
+      "coverage": 0.498,
+      "precision": 0.9839
+    },
+    {
+      "tau": 0.82,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1241,
+      "coverage": 0.6205,
+      "precision": 0.9839
+    },
+    {
+      "tau": 0.84,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 961,
+      "coverage": 0.4805,
+      "precision": 0.9844
+    },
+    {
+      "tau": 0.84,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1192,
+      "coverage": 0.596,
+      "precision": 0.9849
+    },
+    {
+      "tau": 0.84,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 961,
+      "coverage": 0.4805,
+      "precision": 0.9844
+    },
+    {
+      "tau": 0.84,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1192,
+      "coverage": 0.596,
+      "precision": 0.9849
+    },
+    {
+      "tau": 0.84,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 961,
+      "coverage": 0.4805,
+      "precision": 0.9844
+    },
+    {
+      "tau": 0.84,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1192,
+      "coverage": 0.596,
+      "precision": 0.9849
+    },
+    {
+      "tau": 0.84,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 961,
+      "coverage": 0.4805,
+      "precision": 0.9844
+    },
+    {
+      "tau": 0.84,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1192,
+      "coverage": 0.596,
+      "precision": 0.9849
+    },
+    {
+      "tau": 0.86,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 923,
+      "coverage": 0.4615,
+      "precision": 0.9881
+    },
+    {
+      "tau": 0.86,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1137,
+      "coverage": 0.5685,
+      "precision": 0.9886
+    },
+    {
+      "tau": 0.86,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 923,
+      "coverage": 0.4615,
+      "precision": 0.9881
+    },
+    {
+      "tau": 0.86,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1137,
+      "coverage": 0.5685,
+      "precision": 0.9886
+    },
+    {
+      "tau": 0.86,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 923,
+      "coverage": 0.4615,
+      "precision": 0.9881
+    },
+    {
+      "tau": 0.86,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1137,
+      "coverage": 0.5685,
+      "precision": 0.9886
+    },
+    {
+      "tau": 0.86,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 923,
+      "coverage": 0.4615,
+      "precision": 0.9881
+    },
+    {
+      "tau": 0.86,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1137,
+      "coverage": 0.5685,
+      "precision": 0.9886
+    },
+    {
+      "tau": 0.88,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 874,
+      "coverage": 0.437,
+      "precision": 0.9897
+    },
+    {
+      "tau": 0.88,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1075,
+      "coverage": 0.5375,
+      "precision": 0.9898
+    },
+    {
+      "tau": 0.88,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 874,
+      "coverage": 0.437,
+      "precision": 0.9897
+    },
+    {
+      "tau": 0.88,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1075,
+      "coverage": 0.5375,
+      "precision": 0.9898
+    },
+    {
+      "tau": 0.88,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 874,
+      "coverage": 0.437,
+      "precision": 0.9897
+    },
+    {
+      "tau": 0.88,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1075,
+      "coverage": 0.5375,
+      "precision": 0.9898
+    },
+    {
+      "tau": 0.88,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 874,
+      "coverage": 0.437,
+      "precision": 0.9897
+    },
+    {
+      "tau": 0.88,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1075,
+      "coverage": 0.5375,
+      "precision": 0.9898
+    },
+    {
+      "tau": 0.9,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 819,
+      "coverage": 0.4095,
+      "precision": 0.9915
+    },
+    {
+      "tau": 0.9,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 1005,
+      "coverage": 0.5025,
+      "precision": 0.991
+    },
+    {
+      "tau": 0.9,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 819,
+      "coverage": 0.4095,
+      "precision": 0.9915
+    },
+    {
+      "tau": 0.9,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 1005,
+      "coverage": 0.5025,
+      "precision": 0.991
+    },
+    {
+      "tau": 0.9,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 819,
+      "coverage": 0.4095,
+      "precision": 0.9915
+    },
+    {
+      "tau": 0.9,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 1005,
+      "coverage": 0.5025,
+      "precision": 0.991
+    },
+    {
+      "tau": 0.9,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 819,
+      "coverage": 0.4095,
+      "precision": 0.9915
+    },
+    {
+      "tau": 0.9,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 1005,
+      "coverage": 0.5025,
+      "precision": 0.991
+    },
+    {
+      "tau": 0.92,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 740,
+      "coverage": 0.37,
+      "precision": 0.9959
+    },
+    {
+      "tau": 0.92,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 914,
+      "coverage": 0.457,
+      "precision": 0.9945
+    },
+    {
+      "tau": 0.92,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 740,
+      "coverage": 0.37,
+      "precision": 0.9959
+    },
+    {
+      "tau": 0.92,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 914,
+      "coverage": 0.457,
+      "precision": 0.9945
+    },
+    {
+      "tau": 0.92,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 740,
+      "coverage": 0.37,
+      "precision": 0.9959
+    },
+    {
+      "tau": 0.92,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 914,
+      "coverage": 0.457,
+      "precision": 0.9945
+    },
+    {
+      "tau": 0.92,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 740,
+      "coverage": 0.37,
+      "precision": 0.9959
+    },
+    {
+      "tau": 0.92,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 914,
+      "coverage": 0.457,
+      "precision": 0.9945
+    },
+    {
+      "tau": 0.94,
+      "margin": 0.0,
+      "policy": "with_safety_rules",
+      "routed": 650,
+      "coverage": 0.325,
+      "precision": 0.9985
+    },
+    {
+      "tau": 0.94,
+      "margin": 0.0,
+      "policy": "confidence_only",
+      "routed": 809,
+      "coverage": 0.4045,
+      "precision": 0.9975
+    },
+    {
+      "tau": 0.94,
+      "margin": 0.05,
+      "policy": "with_safety_rules",
+      "routed": 650,
+      "coverage": 0.325,
+      "precision": 0.9985
+    },
+    {
+      "tau": 0.94,
+      "margin": 0.05,
+      "policy": "confidence_only",
+      "routed": 809,
+      "coverage": 0.4045,
+      "precision": 0.9975
+    },
+    {
+      "tau": 0.94,
+      "margin": 0.1,
+      "policy": "with_safety_rules",
+      "routed": 650,
+      "coverage": 0.325,
+      "precision": 0.9985
+    },
+    {
+      "tau": 0.94,
+      "margin": 0.1,
+      "policy": "confidence_only",
+      "routed": 809,
+      "coverage": 0.4045,
+      "precision": 0.9975
+    },
+    {
+      "tau": 0.94,
+      "margin": 0.2,
+      "policy": "with_safety_rules",
+      "routed": 650,
+      "coverage": 0.325,
+      "precision": 0.9985
+    },
+    {
+      "tau": 0.94,
+      "margin": 0.2,
+      "policy": "confidence_only",
+      "routed": 809,
+      "coverage": 0.4045,
+      "precision": 0.9975
+    }
+  ],
+  "metadata": {
+    "model_version": "v2-20261115-1857",
+    "trained_at": "2026-11-15T18:57:40+00:00",
+    "trained_on": "train+val",
+    "n_train": 10002,
+    "n_intents": 77,
+    "vectorizer": "word_unigram",
+    "hyperparameters": {
+      "C": 16.0,
+      "max_iter": 2000,
+      "solver": "lbfgs"
+    },
+    "calibration": {
+      "method": null,
+      "cv": 3
+    },
+    "metrics": {
+      "test_accuracy": 0.899,
+      "test_macro_f1": 0.8992,
+      "test_ece": 0.0817,
+      "test_routed_precision": 0.9622,
+      "test_routed_coverage": 0.7208
+    },
+    "thresholds": {
+      "auto_route_threshold": 0.54,
+      "min_margin": 0.1,
+      "escalate_threshold": 0.4,
+      "target_precision": 0.95,
+      "calibrated": false
+    },
+    "selection_basis": "val_nll_then_val_threshold_sweep",
+    "target_precision": 0.95
+  }
+}
