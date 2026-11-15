@@ -8,8 +8,8 @@ outcomes is correct.
 The classifier is a routing signal, not the product. It never writes prose, never
 invents policy, and never claims an intent it is not confident about.
 
-**Status: in progress.** M0–M2 are done and measured (below). The FAQ store,
-Frankfurter client, LangGraph workflow, and HTTP API are next.
+**Status: in progress.** M0–M3 are done and measured (below). The LangGraph
+workflow and HTTP API are next.
 
 ---
 
@@ -83,6 +83,45 @@ precision target, ignoring `NEVER_AUTO_ANSWER_INTENTS` would raise val coverage 
 67.5% to 83.3%. We give up ~16 points of automation so that a fraud report never gets
 an automated answer.
 
+## Tools and content (M3)
+
+**Currency extraction is rule-based, on purpose.** A regex failure is visible and
+testable; an LLM hallucinated currency pair is not. Two rules carry most of the weight:
+
+- An amount belongs to a currency only if nothing but whitespace or punctuation separates
+  them, so "how many quid **is** 200 bucks" converts 200 USD rather than attaching `200`
+  to both tokens.
+- Direction follows the amount, not word order, so the same sentence yields
+  `base=USD, quote=GBP`.
+
+It refuses to answer on one currency (`None` → clarify), and it does not mistake the
+English word "try" for Turkish lira — `TRY`, `KRW`, `RON`, `THB`, `MYR`, `PHP` and `ISK`
+are only recognised as uppercase ISO codes.
+
+Verified end to end against the live API:
+
+```
+"how much is 500 dollars in euros?"
+→ base=USD quote=EUR amount=500
+→ 500.00 USD = 452.41 EUR, as of 2026-11-13
+→ https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR
+```
+
+**The client degrades instead of exploding.** Typed errors separate "this pair is not
+served" (recoverable: ask for another currency) from "upstream is down" (recoverable:
+hand off to a human). Transient 429/5xx responses and timeouts retry with backoff; the
+whole suite runs offline through `httpx.MockTransport`.
+
+**The FAQ corpus is 42 intent-keyed entries**, each with answer variants and a
+clarifying question. Variant choice is lexical overlap with a deterministic tie-break, so
+the same input always yields the same answer. The store validates itself against
+`taxonomy.py` at load time and refuses to start if the two disagree.
+
+All 42 entries ship with `review_status: "draft"`. They explain what to check and what
+happens next, and deliberately assert no bank-specific timelines, fees, or limits —
+invented policy is worse than a handoff. Swapping in institution-approved wording is a
+content change, not a code change.
+
 ## What it does
 
 ```
@@ -103,7 +142,7 @@ Routing policy lives in one auditable file, [`taxonomy.py`](src/banking_triage/t
   Answering them with a quote would be wrong, so they go to the FAQ path.
 - Fraud and dispute intents (`compromised_card`, `lost_or_stolen_card`,
   `transaction_charged_twice`, …) are never auto-answered, regardless of confidence.
-- FAQ coverage is 36 of 77 intents. The rest get a generic acknowledgement plus a
+- FAQ coverage is 42 of 77 intents. The rest get a generic acknowledgement plus a
   handoff. A confident wrong answer is worse than a handoff.
 
 ## Data protocol
@@ -167,8 +206,8 @@ artifact is gitignored — it is reproducible from the two commands above.
 | M0 — scaffold, contracts, licensing | done |
 | M1 — data protocol, baseline classifier | done — 0.8926 test macro-F1 (fit on train) |
 | M2 — calibration, auto-route thresholds | done — 72.1% routed at 96.2% precision |
-| M3 — curated FAQ store, Frankfurter client | next |
-| M4 — LangGraph workflow + clarification turns | planned |
+| M3 — curated FAQ store, Frankfurter client | done — 42 FAQ entries, live rate verified |
+| M4 — LangGraph workflow + clarification turns | next |
 | M5 — FastAPI surface (`/triage`, `/healthz`, `/model`) | planned |
 | M6 — evaluation harness (routing, tool calls, latency) | planned |
 | M7 — CI, Docker, Streamlit demo | planned |
