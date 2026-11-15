@@ -1,0 +1,27 @@
+# virtualenv
+.venv/
+venv/
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# generated data (reproducible via `python -m banking_triage.data`)
+data/processed/
+data/raw/
+
+# model artifacts (reproducible via `python -m banking_triage.train`)
+artifacts/
+
+# local env
+.env
+
+# os noise
+Thumbs.db
+.DS_Store
