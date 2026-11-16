@@ -8,8 +8,9 @@ outcomes is correct.
 The classifier is a routing signal, not the product. It never writes prose, never
 invents policy, and never claims an intent it is not confident about.
 
-**Status: in progress.** M0–M4 are done: measured classifier, routing policy,
-tools, and a multi-turn workflow. The HTTP API and evaluation harness are next.
+**Status: in progress.** M0–M5 are done: measured classifier, routing policy,
+tools, multi-turn workflow, and a documented HTTP API. Evaluation harness, CI,
+and the demo are next.
 
 ---
 
@@ -202,8 +203,66 @@ I want to exchange USD to EUR in…   → faq                        (exchange_v
 what's the exchange rate?           → clarify → "500 USD to EUR" → rate
 ```
 
-111 tests pass, including all five routes, every degradation path, and the multi-turn
-workflow.
+The 111 graph, tool, and schema tests all run offline, including every route, every
+degradation path, and the multi-turn workflow.
+
+## HTTP API (M5)
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /triage` | one turn: `{text, session_id?}` → decision, answer, sources, `route_reason`, latency |
+| `GET /healthz` | 200 `ok`, or 503 `degraded` when the model or FAQ failed to load |
+| `GET /model` | artifact metadata: version, metrics, thresholds, calibration flag |
+| `GET /intents` | all 77 intents with `faq_covered` and `auto_answerable` flags |
+
+```powershell
+uvicorn banking_triage.api:app --port 8000
+
+Invoke-RestMethod -Uri http://127.0.0.1:8000/triage -Method Post `
+  -ContentType application/json -Body '{"text":"convert 250 EUR to CHF"}'
+```
+
+Response (abridged):
+
+```json
+{
+  "intent": "fiat_currency_support",
+  "confidence": 0.911,
+  "route": "exchange_rate",
+  "route_reason": "explicit_currency_pair",
+  "answer": "250.00 EUR = 231.10 CHF at the ECB reference rate for 2026-11-16 ...",
+  "sources": [{"kind": "exchange_rate", "ref": "https://api.frankfurter.dev/v1/latest?base=EUR&symbols=CHF"}],
+  "needs_human": false,
+  "latency_ms": 278.2
+}
+```
+
+That response is the M4 rule made visible: the classifier's top-1 and the router's
+decision disagree, and `route_reason` says why.
+
+Operational behaviour, all covered by tests:
+
+- **A missing artifact does not crash the process.** Startup records the error,
+  `/healthz` reports `degraded` with 503, and `/triage` returns 503 instead of a stack
+  trace. A deploy probe can distinguish "starting" from "broken".
+- **Every non-2xx response is an RFC 9457 problem document** (`application/problem+json`)
+  with a `request_id`, including FastAPI's own validation errors. Unhandled errors are
+  logged and returned as a generic 500 with no internals.
+- **`X-Request-ID` is echoed** when supplied, generated otherwise, and appears in the body.
+- **`/triage` is a sync endpoint on purpose.** The classifier is CPU-bound and the
+  exchange client is synchronous, so FastAPI's threadpool is the right execution model;
+  an async endpoint would block the event loop.
+- **Services are injectable** (`create_app(services=...)`), so the 12 API tests run with
+  no artifact, no FAQ file, and no network. Suite total: 123 tests.
+
+Measured locally: an FAQ answer took ~23 ms and a protected-intent escalation ~22 ms; a
+live rate lookup took 278 ms including TLS on a cold connection. M6 will report
+p50/p95/p99 over the evaluation set instead of anecdotes.
+
+One deployment limit is worth stating: sessions use `InMemorySaver`, so clarification
+state lives in a single process. Multiple workers would need a shared checkpointer
+(Redis/Postgres) before this could run behind a load balancer. That is deliberately out
+of scope here.
 
 ## What it does
 
@@ -259,10 +318,12 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
 
-python -m banking_triage.data      # ~5 k rows → data/processed/*.parquet
-python -m banking_triage.train     # CV + final fit → artifacts/model.joblib
-pytest
+python -m banking_triage.data       # official split → data/processed/*.parquet
+python -m banking_triage.train      # CV + fit → v1 artifact
+python -m banking_triage.calibrate  # thresholds + refit on train+val → v2 artifact
+pytest                              # 123 tests, all offline
 ruff check src tests
+uvicorn banking_triage.api:app --reload   # docs at http://127.0.0.1:8000/docs
 ```
 
 `python -m banking_triage.data --force` rebuilds from the HuggingFace hub. The model
@@ -299,9 +360,9 @@ artifact is gitignored — it is reproducible from the two commands above.
 | M1 — data protocol, baseline classifier | done — 0.8926 test macro-F1 (fit on train) |
 | M2 — calibration, auto-route thresholds | done — 72.1% routed at 96.2% precision |
 | M3 — curated FAQ store, Frankfurter client | done — 42 FAQ entries, live rate verified |
-| M4 — LangGraph workflow + clarification turns | done — 5 routes, session resume, 111 tests |
-| M5 — FastAPI surface (`/triage`, `/healthz`, `/model`) | next |
-| M6 — evaluation harness (routing, tool calls, latency) | planned |
+| M4 — LangGraph workflow + clarification turns | done — 5 routes, session resume |
+| M5 — FastAPI surface (`/triage`, `/healthz`, `/model`, `/intents`) | done — problem details, 123 tests |
+| M6 — evaluation harness (routing, tool calls, latency) | next |
 | M7 — CI, Docker, Streamlit demo | planned |
 
 Headline number the project exists to produce is now measured: **deflection rate at a

@@ -112,6 +112,7 @@ class ModelInfo(BaseModel):
     trained_on: str
     n_intents: int
     vectorizer: str
+    calibrated: bool | None = None
     hyperparameters: dict[str, float | str | int]
     metrics: dict[str, float]
     thresholds: dict[str, float]
