@@ -77,6 +77,10 @@ class Settings:
     def faq_path(self) -> Path:
         return self.data_dir / "faq.jsonl"
 
+    @property
+    def probes_path(self) -> Path:
+        return self.data_dir / "probes.jsonl"
+
     def ensure_dirs(self) -> None:
         for path in (self.data_dir, self.processed_dir, self.artifacts_dir, self.reports_dir):
             path.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,910 @@
+{
+  "generated_at": "2026-11-16T21:13:43+00:00",
+  "model": {
+    "model_version": "v2-20261115-1857",
+    "trained_at": "2026-11-15T18:57:40+00:00",
+    "trained_on": "train+val",
+    "n_intents": 77,
+    "calibrated": false,
+    "thresholds": {
+      "auto_route_threshold": 0.54,
+      "min_margin": 0.1,
+      "escalate_threshold": 0.4
+    },
+    "recorded_test_metrics": {
+      "test_accuracy": 0.899,
+      "test_macro_f1": 0.8992,
+      "test_ece": 0.0817,
+      "test_routed_precision": 0.9622,
+      "test_routed_coverage": 0.7208
+    }
+  },
+  "protocol": {
+    "probes": "24 hand-written policy cases from data/probes.jsonl, including multi-turn clarifications; exchange tool stubbed",
+    "test_split": "official BANKING77 test split, scored once through the full graph; thresholds and copy frozen from earlier milestones",
+    "tool_stub": "1 base = 0.9000 quote as of 2026-01-02; TRY rejected like the live API",
+    "latency": "in-process graph invocation, single thread, exchange stubbed; excludes network time (measured separately in M5)"
+  },
+  "probes": {
+    "n_probes": 24,
+    "n_turns": 27,
+    "passed": 24,
+    "failed": 0,
+    "route_accuracy": 1.0,
+    "intent_accuracy": 1.0,
+    "tool_calls": {
+      "expected": 8,
+      "actual": 8,
+      "correct": 8,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "unexpected_calls": [],
+    "missed_calls": [],
+    "details": [
+      {
+        "id": "faq-pin-change",
+        "passed": true,
+        "failures": [],
+        "why": "Unambiguous FAQ-covered intent: the baseline answer path.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "I would like to change my pin number please",
+            "route": "faq",
+            "reason": "classifier",
+            "decision": "auto_answer",
+            "intent": "change_pin",
+            "confidence": 0.9719,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "faq-topup-failed",
+        "passed": true,
+        "failures": [],
+        "why": "A failure the curated corpus covers; no human needed at first contact.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "my top up failed but the money left my bank account",
+            "route": "faq",
+            "reason": "classifier",
+            "decision": "auto_answer",
+            "intent": "top_up_failed",
+            "confidence": 0.7533,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "faq-topup-limit",
+        "passed": true,
+        "failures": [],
+        "why": "'what is' is a rate cue, but with no currency pair it must not reach the tool.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "what is my top up limit?",
+            "route": "faq",
+            "reason": "classifier",
+            "decision": "auto_answer",
+            "intent": "top_up_limits",
+            "confidence": 0.9892,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "faq-exchange-via-app",
+        "passed": true,
+        "failures": [],
+        "why": "A pair plus a conversion verb in an app how-to question: the 'app' cue must suppress the quote and keep the FAQ answer.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "I want to exchange USD to EUR in the app",
+            "route": "faq",
+            "reason": "classifier",
+            "decision": "auto_answer",
+            "intent": "exchange_via_app",
+            "confidence": 0.5561,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "faq-exchange-capability",
+        "passed": true,
+        "failures": [],
+        "why": "Capability question: 'exchange' with no amount is not a request for a quote.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "I need to exchange USD for GBP",
+            "route": "faq",
+            "reason": "classifier",
+            "decision": "auto_answer",
+            "intent": "exchange_via_app",
+            "confidence": 0.9873,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "clarify-low-info",
+        "passed": true,
+        "failures": [],
+        "why": "No usable signal: ask, never assert.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "help",
+            "route": "clarify",
+            "reason": "low_confidence",
+            "decision": "clarify",
+            "intent": "unable_to_verify_identity",
+            "confidence": 0.1566,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "clarify-rate-no-pair",
+        "passed": true,
+        "failures": [],
+        "why": "A rate question without a pair is a clarification, not a default pair.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "what is the exchange rate?",
+            "route": "clarify",
+            "reason": "currency_pair_missing",
+            "decision": "clarify",
+            "intent": "exchange_rate",
+            "confidence": 0.9444,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "quote-usd-eur",
+        "passed": true,
+        "failures": [],
+        "why": "The classifier puts this at fiat_currency_support 0.067; the pair and amount are the request.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "how much is 500 dollars in euros?",
+            "route": "exchange_rate",
+            "reason": "explicit_currency_pair",
+            "decision": "auto_answer",
+            "intent": "fiat_currency_support",
+            "confidence": 0.0671,
+            "amount": 500.0,
+            "tool_calls": [
+              [
+                "USD",
+                "EUR"
+              ]
+            ],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "quote-eur-chf",
+        "passed": true,
+        "failures": [],
+        "why": "The classifier is confidently wrong here (fiat_currency_support 0.911); the explicit pair outranks it.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "convert 250 EUR to CHF",
+            "route": "exchange_rate",
+            "reason": "explicit_currency_pair",
+            "decision": "auto_answer",
+            "intent": "fiat_currency_support",
+            "confidence": 0.9114,
+            "amount": 250.0,
+            "tool_calls": [
+              [
+                "EUR",
+                "CHF"
+              ]
+            ],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "quote-spoken-aliases",
+        "passed": true,
+        "failures": [],
+        "why": "Aliases resolve to ISO codes and direction follows the amount, not word order.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "how many quid is 200 bucks",
+            "route": "exchange_rate",
+            "reason": "explicit_currency_pair",
+            "decision": "auto_answer",
+            "intent": "disposable_card_limits",
+            "confidence": 0.0911,
+            "amount": 200.0,
+            "tool_calls": [
+              [
+                "USD",
+                "GBP"
+              ]
+            ],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "quote-exchange-verb",
+        "passed": true,
+        "failures": [],
+        "why": "A product verb with an explicit amount is a quote request, not a capability question.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "exchange 500 USD to EUR",
+            "route": "exchange_rate",
+            "reason": "explicit_currency_pair",
+            "decision": "auto_answer",
+            "intent": "fiat_currency_support",
+            "confidence": 0.6236,
+            "amount": 500.0,
+            "tool_calls": [
+              [
+                "USD",
+                "EUR"
+              ]
+            ],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "quote-swap-verb",
+        "passed": true,
+        "failures": [],
+        "why": "'swap' is not in BANKING77's vocabulary at all, so only the structural rule can serve it.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "swap 200 EUR for GBP",
+            "route": "exchange_rate",
+            "reason": "explicit_currency_pair",
+            "decision": "auto_answer",
+            "intent": "fiat_currency_support",
+            "confidence": 0.3542,
+            "amount": 200.0,
+            "tool_calls": [
+              [
+                "EUR",
+                "GBP"
+              ]
+            ],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "quote-unit-amount",
+        "passed": true,
+        "failures": [],
+        "why": "A pair with no amount is answered per unit; the response states the rate rather than inventing an amount.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "what is the rate for GBP to JPY",
+            "route": "exchange_rate",
+            "reason": "explicit_currency_pair",
+            "decision": "auto_answer",
+            "intent": "exchange_rate",
+            "confidence": 0.3788,
+            "amount": 1.0,
+            "tool_calls": [
+              [
+                "GBP",
+                "JPY"
+              ]
+            ],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "suppress-fee-pair",
+        "passed": true,
+        "failures": [],
+        "why": "The 'fee' cue stops the tool: a fee question must not be answered with a rate. Clarifying is acceptable; quoting is not.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "what fee applies if I convert 500 USD to EUR?",
+            "route": "clarify",
+            "reason": "ambiguous",
+            "decision": "clarify",
+            "intent": "fiat_currency_support",
+            "confidence": 0.4823,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "suppress-howto-pair",
+        "passed": true,
+        "failures": [],
+        "why": "The 'how can i' cue stops the tool: an app how-to question is not a quote request.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "how can I convert 500 USD to EUR?",
+            "route": "clarify",
+            "reason": "ambiguous",
+            "decision": "clarify",
+            "intent": "exchange_via_app",
+            "confidence": 0.4571,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "quote-unsupported-pair",
+        "passed": true,
+        "failures": [],
+        "why": "Frankfurter does not publish TRY. The failure must be an answer plus a recorded error, not an exception.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "convert 500 USD to TRY",
+            "route": "clarify",
+            "reason": "unsupported_pair",
+            "decision": "clarify",
+            "intent": "exchange_via_app",
+            "confidence": 0.6135,
+            "amount": 500.0,
+            "tool_calls": [
+              [
+                "USD",
+                "TRY"
+              ]
+            ],
+            "errors": [
+              "exchange: USD->TRY is not available"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "escalate-rate-complaint",
+        "passed": true,
+        "failures": [],
+        "why": "The sharpest suppression case: pair, amount, and a rate cue, but it is a dispute and must never be answered with a live quote.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "I was charged the wrong rate on a 500 USD to EUR payment",
+            "route": "escalate",
+            "reason": "protected_intent",
+            "decision": "escalate",
+            "intent": "card_payment_wrong_exchange_rate",
+            "confidence": 0.7822,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "escalate-rate-dispute",
+        "passed": true,
+        "failures": [],
+        "why": "Same family without a pair; still a dispute.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "I was charged the wrong exchange rate on my card payment",
+            "route": "escalate",
+            "reason": "protected_intent",
+            "decision": "escalate",
+            "intent": "card_payment_wrong_exchange_rate",
+            "confidence": 0.9961,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "escalate-lost-card",
+        "passed": true,
+        "failures": [],
+        "why": "Fraud and loss reports go to a person regardless of confidence.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "I lost my card, please block it before someone uses it",
+            "route": "escalate",
+            "reason": "protected_intent",
+            "decision": "escalate",
+            "intent": "lost_or_stolen_card",
+            "confidence": 0.6688,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "escalate-compromised-card",
+        "passed": true,
+        "failures": [],
+        "why": "Unauthorised use is protected even at 0.976 confidence.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "someone used my card without permission",
+            "route": "escalate",
+            "reason": "protected_intent",
+            "decision": "escalate",
+            "intent": "compromised_card",
+            "confidence": 0.9758,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "escalate-no-curated-answer",
+        "passed": true,
+        "failures": [],
+        "why": "Confident, but outside the 42 intent corpus: hand off instead of improvising.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "can I use apple pay",
+            "route": "escalate",
+            "reason": "no_curated_answer",
+            "decision": "escalate",
+            "intent": "apple_pay_or_google_pay",
+            "confidence": 0.9954,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "session-rate-then-pair",
+        "passed": true,
+        "failures": [],
+        "why": "The second turn must not be re-classified: the pending intent turns a bare pair into a quote.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "what is the exchange rate?",
+            "route": "clarify",
+            "reason": "currency_pair_missing",
+            "decision": "clarify",
+            "intent": "exchange_rate",
+            "confidence": 0.9444,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          },
+          {
+            "turn": 2,
+            "text": "500 USD to EUR",
+            "route": "exchange_rate",
+            "reason": "follow_up_currency_pair",
+            "decision": "auto_answer",
+            "intent": "exchange_rate",
+            "confidence": 0.9444,
+            "amount": 500.0,
+            "tool_calls": [
+              [
+                "USD",
+                "EUR"
+              ]
+            ],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "session-rate-then-topic-change",
+        "passed": true,
+        "failures": [],
+        "why": "A clarification must not trap the user: a real new question is classified normally.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "what is the exchange rate?",
+            "route": "clarify",
+            "reason": "currency_pair_missing",
+            "decision": "clarify",
+            "intent": "exchange_rate",
+            "confidence": 0.9444,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          },
+          {
+            "turn": 2,
+            "text": "my card was declined at the shop",
+            "route": "faq",
+            "reason": "classifier",
+            "decision": "auto_answer",
+            "intent": "declined_card_payment",
+            "confidence": 0.991,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      },
+      {
+        "id": "session-rate-then-one-currency",
+        "passed": true,
+        "failures": [],
+        "why": "Half an answer keeps the intent pending and asks again without inventing the other side of the pair.",
+        "turns": [
+          {
+            "turn": 1,
+            "text": "I need a rate",
+            "route": "clarify",
+            "reason": "currency_pair_missing",
+            "decision": "clarify",
+            "intent": "exchange_rate",
+            "confidence": 0.7906,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          },
+          {
+            "turn": 2,
+            "text": "euros",
+            "route": "clarify",
+            "reason": "currency_pair_missing",
+            "decision": "clarify",
+            "intent": "exchange_rate",
+            "confidence": 0.7906,
+            "amount": null,
+            "tool_calls": [],
+            "errors": []
+          }
+        ]
+      }
+    ]
+  },
+  "test_split": {
+    "n": 3080,
+    "coverage": 0.3724,
+    "precision": 0.9512,
+    "correct_auto_rate": 0.3542,
+    "auto_answered": 1147,
+    "auto_answer_correct": 1091,
+    "precision_definition": "share of auto-answered messages whose predicted intent matches the gold label; an exchange quote counts as correct only when the gold intent is exchange_rate",
+    "decisions": {
+      "auto_answer": 1147,
+      "clarify": 464,
+      "escalate": 1469
+    },
+    "routes": {
+      "clarify": 464,
+      "escalate": 1469,
+      "exchange_rate": 1,
+      "faq": 1146
+    },
+    "reasons": {
+      "classifier": 1146,
+      "no_curated_answer": 1033,
+      "protected_intent": 436,
+      "low_confidence": 236,
+      "ambiguous": 187,
+      "currency_pair_missing": 41,
+      "explicit_currency_pair": 1
+    },
+    "classifier_policy": {
+      "routed": 2220,
+      "coverage": 0.7208,
+      "precision": 0.9622,
+      "note": "M2 definition, recomputed here: confident and wide-margin and not a never-auto intent, whether or not curated copy exists. M2 reported 2220/3080 at 0.9622; the workflow answers fewer because uncovered intents escalate instead of improvising."
+    },
+    "never_auto": {
+      "predicted_and_auto_answered": 0,
+      "true_label_and_auto_answered": 2,
+      "safety_note": "The first count must be zero by construction; the second is the residual risk from misclassifying a protected intent as a safe one.",
+      "samples": [
+        {
+          "text": "I can't transfer money from my account.",
+          "true": "declined_transfer",
+          "predicted": "transfer_into_account",
+          "route_reason": "classifier"
+        },
+        {
+          "text": "Is there a fee for exchanging cash?",
+          "true": "wrong_exchange_rate_for_cash_withdrawal",
+          "predicted": "exchange_charge",
+          "route_reason": "classifier"
+        }
+      ]
+    },
+    "explicit_pair_auto_answers": 1,
+    "degraded": {
+      "responses_with_errors": 0,
+      "error_messages": {}
+    },
+    "latency_ms": {
+      "p50": 5.79,
+      "p95": 6.87,
+      "p99": 7.91,
+      "mean": 5.87,
+      "max": 10.92
+    },
+    "false_auto_pairs": {
+      "fiat_currency_support -> exchange_via_app": 4,
+      "top_up_failed -> top_up_reverted": 4,
+      "verify_my_identity -> why_verify_identity": 3,
+      "card_arrival -> card_delivery_estimate": 2,
+      "pin_blocked -> card_not_working": 2,
+      "top_up_reverted -> top_up_failed": 2,
+      "unable_to_verify_identity -> why_verify_identity": 2,
+      "unable_to_verify_identity -> verify_my_identity": 2,
+      "pending_transfer -> balance_not_updated_after_bank_transfer": 2,
+      "transfer_timing -> balance_not_updated_after_bank_transfer": 2
+    },
+    "false_auto_answers": [
+      {
+        "text": "When will I get my card?",
+        "true": "card_arrival",
+        "predicted": "card_delivery_estimate",
+        "confidence": 0.7335,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Delivery timing depends on your country and the card type; the app shows the current estimate for your order."
+      },
+      {
+        "text": "How long does a card delivery take?",
+        "true": "card_arrival",
+        "predicted": "card_delivery_estimate",
+        "confidence": 0.8808,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Delivery timing depends on your country and the card type; the app shows the current estimate for your order."
+      },
+      {
+        "text": "Do you support any currency?",
+        "true": "fiat_currency_support",
+        "predicted": "supported_cards_and_currencies",
+        "confidence": 0.5561,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Tell me the merchant country and currency and I can say whether it is a supported combination, or pass it to an agent."
+      },
+      {
+        "text": "How do I change currencies to euros?",
+        "true": "fiat_currency_support",
+        "predicted": "exchange_via_app",
+        "confidence": 0.7733,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Currency exchange in the app is under the balance or card screen; I cannot perform the exchange for you."
+      },
+      {
+        "text": "Am I able to exchange currencies?",
+        "true": "fiat_currency_support",
+        "predicted": "exchange_via_app",
+        "confidence": 0.8788,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "If the exchange option is not shown for your currency, it may not be supported for your account type."
+      },
+      {
+        "text": "I want to make a currency exchange to EU.",
+        "true": "fiat_currency_support",
+        "predicted": "exchange_via_app",
+        "confidence": 0.7603,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "If the exchange option is not shown for your currency, it may not be supported for your account type."
+      },
+      {
+        "text": "Can I exchange currencies?",
+        "true": "fiat_currency_support",
+        "predicted": "exchange_via_app",
+        "confidence": 0.5637,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "If the exchange option is not shown for your currency, it may not be supported for your account type."
+      },
+      {
+        "text": "I am waiting for my card to arrive.",
+        "true": "card_delivery_estimate",
+        "predicted": "card_arrival",
+        "confidence": 0.8121,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Card orders can be tracked in the app under Cards. If tracking shows the card as sent and it has not arrived, an agent can start a trace with the delivery provider."
+      },
+      {
+        "text": "How do I unblock my card using the app?",
+        "true": "card_not_working",
+        "predicted": "pin_blocked",
+        "confidence": 0.5419,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "A blocked PIN is usually unblocked with the PIN letter or through the app. If neither works, an agent has to reset it."
+      },
+      {
+        "text": "How do I reset my PIN, I can't seem to use my card?",
+        "true": "pin_blocked",
+        "predicted": "card_not_working",
+        "confidence": 0.6556,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Check that the card is activated and not frozen in the app. If it still fails, note the time, amount and merchant so an agent can check the decline."
+      },
+      {
+        "text": "My card's frozen, what can I do?",
+        "true": "pin_blocked",
+        "predicted": "card_not_working",
+        "confidence": 0.7633,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Check that the card is activated and not frozen in the app. If it still fails, note the time, amount and merchant so an agent can check the decline."
+      },
+      {
+        "text": "Will a transfer incur a fee?",
+        "true": "top_up_by_bank_transfer_charge",
+        "predicted": "transfer_fee_charged",
+        "confidence": 0.7852,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "I cannot refund a transfer fee. An agent can explain which fee applied and why."
+      },
+      {
+        "text": "What are the fees for top-ups?",
+        "true": "top_up_by_bank_transfer_charge",
+        "predicted": "top_up_by_card_charge",
+        "confidence": 0.8731,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "I cannot waive or refund a fee. An agent can explain which fee applied to a specific top-up."
+      },
+      {
+        "text": "Topping up my card is not working because I believe the top up is pending",
+        "true": "pending_top_up",
+        "predicted": "top_up_failed",
+        "confidence": 0.5894,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Failed top-ups are usually a declined funding source or a limit. The app shows the status of the last attempt."
+      },
+      {
+        "text": "transaction failed?",
+        "true": "transfer_not_received_by_recipient",
+        "predicted": "failed_transfer",
+        "confidence": 0.9256,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "A failed transfer is normally returned to your balance. The app shows the failure reason and the return."
+      },
+      {
+        "text": "The receipient doesn't see my money transfer.",
+        "true": "transfer_not_received_by_recipient",
+        "predicted": "balance_not_updated_after_bank_transfer",
+        "confidence": 0.592,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Bank transfers usually update after the sending bank settles. If your bank shows it as sent, the app may need a moment or a trace."
+      },
+      {
+        "text": "I believe my money did not go through with my top up, was there a problem on your end?",
+        "true": "top_up_reverted",
+        "predicted": "top_up_failed",
+        "confidence": 0.6684,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "If the money left your bank but the balance did not change, an agent needs to trace it rather than retry."
+      },
+      {
+        "text": "On my last transaction it seem that my top-up was not successful.",
+        "true": "top_up_reverted",
+        "predicted": "top_up_failed",
+        "confidence": 0.6209,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Failed top-ups are usually a declined funding source or a limit. The app shows the status of the last attempt."
+      },
+      {
+        "text": "The balance on my account wasn't updated after I made a depost.",
+        "true": "balance_not_updated_after_cheque_or_cash_deposit",
+        "predicted": "balance_not_updated_after_bank_transfer",
+        "confidence": 0.8907,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "If it has been sent and your balance has not moved, an agent can check the incoming reference."
+      },
+      {
+        "text": "Do I need to verify my identity?",
+        "true": "why_verify_identity",
+        "predicted": "verify_my_identity",
+        "confidence": 0.5705,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Verification usually needs a document photo and a selfie in the app; I cannot verify an identity here."
+      },
+      {
+        "text": "It is impossible to verify my identity",
+        "true": "unable_to_verify_identity",
+        "predicted": "why_verify_identity",
+        "confidence": 0.814,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Identity checks are a regulatory requirement for holding an account and moving money; the app explains the specific requirement for your case."
+      },
+      {
+        "text": "I can't verify my identity.",
+        "true": "unable_to_verify_identity",
+        "predicted": "verify_my_identity",
+        "confidence": 0.6531,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Verification usually needs a document photo and a selfie in the app; I cannot verify an identity here."
+      },
+      {
+        "text": "What do i need to verify my id?",
+        "true": "unable_to_verify_identity",
+        "predicted": "verify_my_identity",
+        "confidence": 0.8684,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Verification usually needs a document photo and a selfie in the app; I cannot verify an identity here."
+      },
+      {
+        "text": "Why can't I verify my identity?",
+        "true": "unable_to_verify_identity",
+        "predicted": "why_verify_identity",
+        "confidence": 0.8243,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "Identity checks are a regulatory requirement for holding an account and moving money; the app explains the specific requirement for your case."
+      },
+      {
+        "text": "What do I need to do for a PIN?",
+        "true": "get_physical_card",
+        "predicted": "pin_blocked",
+        "confidence": 0.5631,
+        "route": "faq",
+        "route_reason": "classifier",
+        "answer": "A blocked PIN is usually unblocked with the PIN letter or through the app. If neither works, an agent has to reset it."
+      }
+    ]
+  }
+}

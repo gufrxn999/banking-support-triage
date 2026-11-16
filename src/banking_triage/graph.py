@@ -220,7 +220,7 @@ class TriageGraph:
         prediction = self.classifier.predict(
             self._classification_text(state), top_k=self.settings.top_k
         )
-        choice = self._decide(prediction, state.text, self._thresholds())
+        choice = self._decide(prediction, state.text, self.thresholds())
 
         return {
             **reset,
@@ -516,8 +516,9 @@ class TriageGraph:
         return {"steps": steps}
 
     # --- helpers --------------------------------------------------------
-    def _thresholds(self) -> dict[str, float]:
-        """Artifact thresholds win over defaults, so serving matches M2."""
+    def thresholds(self) -> dict[str, float]:
+        """The serving policy: artifact thresholds win over defaults, so what
+        the evaluation measures is what the API actually does."""
         raw = self.classifier.metadata.get("thresholds") or {}
         defaults = {
             "auto_route_threshold": self.settings.auto_route_threshold,

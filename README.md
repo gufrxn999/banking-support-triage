@@ -2,15 +2,16 @@
 
 Turns a free-text banking support message into one of **77 canonical intents**, then
 either answers it from a curated FAQ, answers an exchange-rate question with a live
-ECB reference rate, or escalates to a human — and measures how often each of those
-outcomes is correct.
+ECB reference rate, asks a clarifying question, or escalates to a human — and measures
+how often each of those outcomes is correct.
 
 The classifier is a routing signal, not the product. It never writes prose, never
 invents policy, and never claims an intent it is not confident about.
 
-**Status: in progress.** M0–M5 are done: measured classifier, routing policy,
-tools, multi-turn workflow, and a documented HTTP API. Evaluation harness, CI,
-and the demo are next.
+**Status: in progress.** M0–M6 are done: measured classifier, routing policy,
+tools, multi-turn workflow, a documented HTTP API, and an evaluation harness with
+measured routing, tool-call, and latency numbers. CI, containerisation, and the
+demo are next.
 
 ---
 
@@ -57,20 +58,24 @@ Evidence: [`reports/m2_calibration.json`](reports/m2_calibration.json).
 | Test accuracy | 0.8990 |
 | Test macro-F1 | 0.8992 |
 | Test ECE (10-bin) | 0.0817 |
-| **Auto-routed at ≥0.95 precision** | **2,220 / 3,080 = 72.1%** |
-| **Precision on auto-routed traffic** | **0.9622** |
+| **Classifier policy: routable at ≥0.95 precision** | **2,220 / 3,080 = 72.1%** |
+| **Precision on that routable subset** | **0.9622** |
 
 Thresholds: `confidence ≥ 0.54` **and** `top1 − top2 ≥ 0.10`, with fraud and dispute
-intents excluded regardless of confidence. That is the headline claim:
+intents excluded regardless of confidence. This measures the **classifier policy**: any
+confident message counts as routable, whether or not reviewed copy exists for its intent.
 
-> auto-resolves 72.1% of test traffic at 96.2% precision, and clarifies or escalates
-> the remaining 27.9%
+> the classifier policy can auto-route 72.1% of test traffic at 96.2% precision
 
-The 27.9% is not all handed to a human: low-confidence and thin-margin messages get a
-clarifying question first (M4), which is cheaper than a ticket and safer than a guess.
-Clarifications are not counted as auto-answered, so the 72.1% claim stays conservative.
-These figures come from the M2 classifier policy; M6 re-measures the full workflow,
-including the explicit-pair rule and tool calls.
+That is a ceiling, not the shipped deflection rate. M6 routes the same test split through
+the full workflow and measures **37.2% auto-answered at 95.1% precision**; the difference
+is traffic whose confident intent has no reviewed answer yet. Both numbers are reported,
+because collapsing them into one would overstate what the product does.
+
+The 27.9% the classifier does not route is not all handed to a human either: low-confidence
+and thin-margin messages get a clarifying question first (M4), which is cheaper than a
+ticket and safer than a guess. Clarifications are not counted as auto-answered, so neither
+coverage figure includes them.
 
 **Calibration was tested and rejected.** Sigmoid calibration (per-class OvR, as
 `CalibratedClassifierCV` implements it for multiclass) made things substantially worse
@@ -203,8 +208,9 @@ I want to exchange USD to EUR in…   → faq                        (exchange_v
 what's the exchange rate?           → clarify → "500 USD to EUR" → rate
 ```
 
-The 111 graph, tool, and schema tests all run offline, including every route, every
-degradation path, and the multi-turn workflow.
+The 145 tests all run offline (the model-backed ones skip cleanly when the artifact is
+absent), including every route, every degradation path, the multi-turn workflow, the HTTP
+contract, and the evaluation arithmetic.
 
 ## HTTP API (M5)
 
@@ -253,16 +259,94 @@ Operational behaviour, all covered by tests:
   exchange client is synchronous, so FastAPI's threadpool is the right execution model;
   an async endpoint would block the event loop.
 - **Services are injectable** (`create_app(services=...)`), so the 12 API tests run with
-  no artifact, no FAQ file, and no network. Suite total: 123 tests.
+  no artifact, no FAQ file, and no network. Suite total: 145 tests.
 
-Measured locally: an FAQ answer took ~23 ms and a protected-intent escalation ~22 ms; a
-live rate lookup took 278 ms including TLS on a cold connection. M6 will report
-p50/p95/p99 over the evaluation set instead of anecdotes.
+A single request measured ~23 ms for an FAQ answer and ~278 ms for a live rate lookup
+including TLS on a cold connection. M6 measures the distribution over 3,080 turns, with
+the network excluded so the number is about the workflow rather than the internet.
 
 One deployment limit is worth stating: sessions use `InMemorySaver`, so clarification
 state lives in a single process. Multiple workers would need a shared checkpointer
 (Redis/Postgres) before this could run behind a load balancer. That is deliberately out
 of scope here.
+
+## Evaluation (M6)
+
+Two measurements, kept separate because they answer different questions. Evidence:
+[`reports/m6_evaluation.json`](reports/m6_evaluation.json), reproduced by
+`python -m banking_triage.evaluate`.
+
+**1. Probe set — does the policy do what it claims?** 24 hand-written cases over 27 turns,
+covering what BANKING77 cannot express: slot-filled conversions, spoken currency aliases,
+a fee question that mentions a pair, a rate complaint that mentions both a pair and an
+amount, an unsupported currency, and three clarification sessions. The exchange tool is
+stubbed with a fixed rate, so the run is reproducible and offline.
+
+| Probe result | Value |
+|---|---|
+| Probes / turns | 24 / 27 |
+| Passed | **24 / 24** |
+| Route accuracy | 100% |
+| Tool calls expected / made / correct | 8 / 8 / 8 |
+| Tool precision / recall | **1.00 / 1.00** |
+
+The tool metrics are the useful part: precision punishes quoting when it should not,
+recall punishes asking when it should quote. Both are 1.00. The eight expected calls
+include one deliberate failure: the unsupported-pair probe expects the tool to be
+attempted, then degraded into a clarification. The two hardest suppression cases —
+`I was charged the wrong rate on a 500 USD to EUR payment` and
+`what fee applies if I convert 500 USD to EUR?` — both name a pair and neither calls the
+tool. The probe file states its expectation for every case, including
+`"tool": null`, so "did not call" is asserted rather than inferred from silence.
+
+**2. Official test split — what does the shipped workflow actually resolve?** All 3,080
+test messages are routed through the same graph the API serves, with the exchange tool
+stubbed.
+
+| Outcome | Messages | Share |
+|---|---|---|
+| **Auto-answered** | **1,147** | **37.2%** |
+| — of which correct | 1,091 | 35.4% |
+| Clarified (asks a question, no human yet) | 464 | 15.1% |
+| Escalated — confident intent, no reviewed copy | 1,033 | 33.5% |
+| Escalated — fraud or dispute intent | 436 | 14.2% |
+
+Precision on auto-answered traffic is **95.1%** (1,091/1,147), against a 95% target.
+Latency over the same 3,080 turns: **p50 5.8 ms, p95 6.9 ms, p99 7.9 ms** (in-process,
+single thread, network excluded).
+
+**Why 37.2% and not 72.1%?** Because they measure different things, and the harness shows
+the difference is content, not model quality:
+
+- Recomputing the M2 policy on the same test rows reproduces it exactly: **2,220 / 3,080
+  = 72.1% at 96.2% precision**. The classifier really can support 72%.
+- The shipped workflow only auto-answers intents with reviewed copy. 1,033 confident
+  messages land on intents that have none, so they escalate instead of improvising.
+- The other 436 are protected fraud/dispute intents, which are never auto-answered.
+
+So the binding constraint on deflection is the 42-intent FAQ corpus, not classification
+accuracy. That gap is a content roadmap with a measurable ceiling, and the report states
+it rather than hiding it behind the higher classifier number.
+
+**Safety is measured two ways, because one of them would overstate it.** No message whose
+*predicted* intent is protected was auto-answered (0/3,080, enforced by construction).
+But 2 messages whose *gold* label is protected were auto-answered because the classifier
+chose a safe neighbouring intent: `I can't transfer money from my account.`
+(`declined_transfer` → `transfer_into_account`) and `Is there a fee for exchanging cash?`
+(`wrong_exchange_rate_for_cash_withdrawal` → `exchange_charge`). Both got adjacent,
+on-topic copy rather than a resolution, and both are listed in the report.
+
+**The 56 wrong auto-answers are mostly neighbour confusions, not topic changes.** The most
+common pairs are `fiat_currency_support → exchange_via_app`,
+`top_up_failed → top_up_reverted`, `verify_my_identity → why_verify_identity`, and
+`card_arrival → card_delivery_estimate`. This is exactly why M3 added the most-confused
+neighbour of each risky intent to the corpus: a wrong answer that is still on-topic is a
+smaller failure than a generic handoff.
+
+**The explicit-pair rule barely fires on BANKING77** — exactly 1 of 3,080 test messages
+reached the tool through that rule. That is the point of the probe set: the dataset cannot
+measure the rule, and a green test-split number alone would have hidden that. The probes
+carry the evidence, so the rule is tested independently of the corpus.
 
 ## What it does
 
@@ -321,7 +405,8 @@ pip install -e ".[dev]"
 python -m banking_triage.data       # official split → data/processed/*.parquet
 python -m banking_triage.train      # CV + fit → v1 artifact
 python -m banking_triage.calibrate  # thresholds + refit on train+val → v2 artifact
-pytest                              # 123 tests, all offline
+python -m banking_triage.evaluate   # probes + test split → reports/m6_evaluation.json
+pytest                              # 145 tests, all offline
 ruff check src tests
 uvicorn banking_triage.api:app --reload   # docs at http://127.0.0.1:8000/docs
 ```
@@ -348,6 +433,10 @@ artifact is gitignored — it is reproducible from the two commands above.
 - **Rules may outrank the classifier when the evidence is structural.** Two currencies
   and an amount are not a lexical hint; they are the request. The override is narrow,
   cue-guarded, and impossible to trigger for a fraud or dispute intent.
+- **The reported number is the shipped one.** The 72.1% classifier policy is a ceiling;
+  M6 measures what the workflow actually answers (37.2%) and decomposes the rest. Quoting
+  the higher number as the product's deflection rate would be the easiest lie to tell
+  here, and the probe set exists to make the difference visible.
 - **Exchange rates are dated, never "today".** Frankfurter serves ECB reference rates
   on business days only, so answers say "as of 2026-11-13". Implied live quotes would
   be wrong in a way that matters to a bank.
@@ -358,16 +447,17 @@ artifact is gitignored — it is reproducible from the two commands above.
 |---|---|
 | M0 — scaffold, contracts, licensing | done |
 | M1 — data protocol, baseline classifier | done — 0.8926 test macro-F1 (fit on train) |
-| M2 — calibration, auto-route thresholds | done — 72.1% routed at 96.2% precision |
+| M2 — calibration, auto-route thresholds | done — classifier policy 72.1% at 96.2% |
 | M3 — curated FAQ store, Frankfurter client | done — 42 FAQ entries, live rate verified |
 | M4 — LangGraph workflow + clarification turns | done — 5 routes, session resume |
-| M5 — FastAPI surface (`/triage`, `/healthz`, `/model`, `/intents`) | done — problem details, 123 tests |
-| M6 — evaluation harness (routing, tool calls, latency) | next |
-| M7 — CI, Docker, Streamlit demo | planned |
+| M5 — FastAPI surface (`/triage`, `/healthz`, `/model`, `/intents`) | done — problem details, injectable services |
+| M6 — evaluation harness (routing, tool calls, latency) | done — 24/24 probes, 37.2% at 95.1% |
+| M7 — CI, Docker, Streamlit demo | next |
 
-Headline number the project exists to produce is now measured: **deflection rate at a
-stated precision**. Everything else in the metrics table exists to prove that number is
-trustworthy.
+The headline number the project exists to produce is now measured: **deflection rate at a
+stated precision, and the gap between what the classifier can support (72.1%) and what
+reviewed content actually resolves (37.2%)**. Everything else in the metrics tables exists
+to prove those numbers are trustworthy.
 
 ## Scope
 

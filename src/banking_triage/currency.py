@@ -261,8 +261,25 @@ def describe_mentions(text: str) -> list[str]:
 # Cues are deliberately conservative: a complaint about a rate, a fee question,
 # or a "how do I do this in the app" question must keep its FAQ/handoff route.
 _RATE_REQUEST_CUES = frozenset(
-    {"rate", "rates", "convert", "conversion", "how much", "worth", "exchange"}
+    {
+        "rate",
+        "rates",
+        "convert",
+        "conversion",
+        "how much",
+        "how many",
+        "what is",
+        "what's",
+        "worth",
+    }
 )
+
+# "exchange" and "swap" are also product vocabulary: "I need to exchange USD for
+# GBP" asks what is possible, not for a quote. They only count as a conversion
+# request when the message also names an amount, which a capability question
+# does not.
+_AMOUNT_REQUIRED_CUES = frozenset({"exchange", "swap"})
+
 _NOT_A_QUOTE_CUES = frozenset(
     {
         "app",
@@ -278,6 +295,11 @@ _NOT_A_QUOTE_CUES = frozenset(
         "available",
         "hold",
         "possible",
+        "failed",
+        "failure",
+        "declined",
+        "problem",
+        "issue",
         "can i",
         "how do i",
         "how can i",
@@ -292,7 +314,12 @@ def _cue_pattern(phrases: frozenset[str]) -> re.Pattern[str]:
 
 
 _RATE_CUE_RE = _cue_pattern(_RATE_REQUEST_CUES)
+_AMOUNT_CUE_RE = _cue_pattern(_AMOUNT_REQUIRED_CUES)
 _NOT_QUOTE_RE = _cue_pattern(_NOT_A_QUOTE_CUES)
+
+
+def _mentions_an_amount(text: str) -> bool:
+    return any(mention.amount is not None for mention in extract_mentions(text))
 
 
 def explicit_conversion_request(text: str) -> CurrencyQuery | None:
@@ -303,6 +330,13 @@ def explicit_conversion_request(text: str) -> CurrencyQuery | None:
     *kind* of answer at all.
     """
     lowered = (text or "").lower()
-    if not _RATE_CUE_RE.search(lowered) or _NOT_QUOTE_RE.search(lowered):
+    if _NOT_QUOTE_RE.search(lowered):
         return None
-    return build_query(text)
+    query = build_query(text)
+    if query is None:
+        return None
+    if _RATE_CUE_RE.search(lowered):
+        return query
+    if _AMOUNT_CUE_RE.search(lowered) and _mentions_an_amount(text):
+        return query
+    return None

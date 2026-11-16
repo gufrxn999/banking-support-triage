@@ -109,13 +109,27 @@ def test_empty_text_yields_no_mentions() -> None:
 def test_explicit_conversion_request_is_recognised() -> None:
     for text in (
         "how much is 500 dollars in euros?",
+        "how many quid is 200 bucks",
         "convert 250 EUR to CHF",
         "what's the rate for GBP to JPY",
         "how much would 1000 euros be in pounds",
+        "what is 500 USD in EUR?",
         "exchange 500 USD to EUR",
+        "swap 200 EUR for GBP",
     ):
         query = explicit_conversion_request(text)
         assert query is not None, text
+
+
+def test_exchange_capability_question_is_not_a_conversion_request() -> None:
+    # "I need to exchange USD for GBP" asks what is possible, not for a quote.
+    # The verb alone is not enough; an explicit amount is required.
+    assert explicit_conversion_request("I need to exchange USD for GBP") is None
+    assert explicit_conversion_request("I want to swap some currency") is None
+
+
+def test_failed_exchange_is_not_a_conversion_request() -> None:
+    assert explicit_conversion_request("my exchange of 500 USD to EUR failed") is None
 
 
 def test_rate_complaint_is_not_a_conversion_request() -> None:
