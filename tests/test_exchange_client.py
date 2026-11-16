@@ -68,8 +68,9 @@ def test_unsupported_pair_raises_recoverable_error() -> None:
 
 def test_missing_quote_in_rates_is_an_unsupported_pair() -> None:
     payload = {"amount": 1.0, "base": "USD", "date": "2026-11-13", "rates": {}}
-    with _client(lambda request: httpx.Response(200, json=payload)) as client, pytest.raises(
-        UnsupportedCurrencyError
+    with (
+        _client(lambda request: httpx.Response(200, json=payload)) as client,
+        pytest.raises(UnsupportedCurrencyError),
     ):
         client.latest("USD", "EUR")
 
@@ -119,8 +120,9 @@ def test_same_currency_is_rejected_before_any_call() -> None:
 
 
 def test_invalid_code_is_rejected() -> None:
-    with _client(lambda request: httpx.Response(200, json=LATEST_OK)) as client, pytest.raises(
-        ValueError, match="ISO-4217"
+    with (
+        _client(lambda request: httpx.Response(200, json=LATEST_OK)) as client,
+        pytest.raises(ValueError, match="ISO-4217"),
     ):
         client.latest("US", "EUR")
 
@@ -134,7 +136,8 @@ def test_currency_list_is_uppercased() -> None:
 
 
 def test_empty_currency_list_is_an_upstream_failure() -> None:
-    with _client(lambda request: httpx.Response(200, json={})) as client, pytest.raises(
-        ExchangeRateUnavailable
+    with (
+        _client(lambda request: httpx.Response(200, json={})) as client,
+        pytest.raises(ExchangeRateUnavailable),
     ):
         client.currencies()

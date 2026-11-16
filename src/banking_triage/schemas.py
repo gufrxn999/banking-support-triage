@@ -98,6 +98,7 @@ class TriageResponse(BaseModel):
     alternatives: list[IntentScore] = Field(default_factory=list)
     route: Route
     decision: Decision
+    route_reason: str | None = None
     answer: str
     sources: list[Source] = Field(default_factory=list)
     needs_human: bool
@@ -148,9 +149,20 @@ class TriageState(BaseModel):
     text: str
     session_id: str | None = None
 
+    # Multi-turn bookkeeping. `pending_intent` marks a clarification the caller
+    # is answering; the checkpointer restores it on the next turn of the same
+    # session. `last_user_text` gives a terse reply ("the virtual one") the
+    # context it needs to be classified.
+    turn: int = 0
+    pending_intent: str | None = None
+    last_user_text: str | None = None
+
     prediction: Prediction | None = None
     route: Route | None = None
     decision: Decision | None = None
+    # Why the router chose this route; a rule-based override and a confident
+    # classifier must not look identical in an audit.
+    route_reason: str | None = None
 
     currency_query: CurrencyQuery | None = None
     exchange_rate: ExchangeRate | None = None

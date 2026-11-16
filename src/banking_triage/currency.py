@@ -249,3 +249,60 @@ def build_query(text: str) -> CurrencyQuery | None:
 def describe_mentions(text: str) -> list[str]:
     """Human-readable currency codes found, for clarification prompts."""
     return [mention.currency for mention in extract_mentions(text)]
+
+
+# An explicit conversion request is not something the intent classifier can
+# reliably recognise: BANKING77's `exchange_rate` examples are all "what are
+# your rates?", with no pair or amount. "convert 250 EUR to CHF" is instead
+# classified as `fiat_currency_support` with high confidence. So the presence of
+# a complete pair plus a request cue is treated as stronger evidence than the
+# classifier's top-1, and routed to the tool deterministically.
+#
+# Cues are deliberately conservative: a complaint about a rate, a fee question,
+# or a "how do I do this in the app" question must keep its FAQ/handoff route.
+_RATE_REQUEST_CUES = frozenset(
+    {"rate", "rates", "convert", "conversion", "how much", "worth", "exchange"}
+)
+_NOT_A_QUOTE_CUES = frozenset(
+    {
+        "app",
+        "charged",
+        "charge",
+        "fee",
+        "fees",
+        "wrong",
+        "refund",
+        "dispute",
+        "complaint",
+        "support",
+        "available",
+        "hold",
+        "possible",
+        "can i",
+        "how do i",
+        "how can i",
+        "where do i",
+    }
+)
+
+
+def _cue_pattern(phrases: frozenset[str]) -> re.Pattern[str]:
+    ordered = "|".join(re.escape(phrase) for phrase in sorted(phrases, key=len, reverse=True))
+    return re.compile(rf"\b(?:{ordered})\b")
+
+
+_RATE_CUE_RE = _cue_pattern(_RATE_REQUEST_CUES)
+_NOT_QUOTE_RE = _cue_pattern(_NOT_A_QUOTE_CUES)
+
+
+def explicit_conversion_request(text: str) -> CurrencyQuery | None:
+    """Return a query only for an explicit "convert this pair" request.
+
+    This is a routing signal, not a parser change: `build_query` still decides
+    whether the pair is usable. The cues decide whether a quote is the right
+    *kind* of answer at all.
+    """
+    lowered = (text or "").lower()
+    if not _RATE_CUE_RE.search(lowered) or _NOT_QUOTE_RE.search(lowered):
+        return None
+    return build_query(text)

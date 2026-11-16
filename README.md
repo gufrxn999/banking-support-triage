@@ -8,8 +8,8 @@ outcomes is correct.
 The classifier is a routing signal, not the product. It never writes prose, never
 invents policy, and never claims an intent it is not confident about.
 
-**Status: in progress.** M0–M3 are done and measured (below). The LangGraph
-workflow and HTTP API are next.
+**Status: in progress.** M0–M4 are done: measured classifier, routing policy,
+tools, and a multi-turn workflow. The HTTP API and evaluation harness are next.
 
 ---
 
@@ -62,7 +62,14 @@ Evidence: [`reports/m2_calibration.json`](reports/m2_calibration.json).
 Thresholds: `confidence ≥ 0.54` **and** `top1 − top2 ≥ 0.10`, with fraud and dispute
 intents excluded regardless of confidence. That is the headline claim:
 
-> auto-resolves 72.1% of test traffic at 96.2% precision, escalating the remaining 27.9%
+> auto-resolves 72.1% of test traffic at 96.2% precision, and clarifies or escalates
+> the remaining 27.9%
+
+The 27.9% is not all handed to a human: low-confidence and thin-margin messages get a
+clarifying question first (M4), which is cheaper than a ticket and safer than a guess.
+Clarifications are not counted as auto-answered, so the 72.1% claim stays conservative.
+These figures come from the M2 classifier policy; M6 re-measures the full workflow,
+including the explicit-pair rule and tool calls.
 
 **Calibration was tested and rejected.** Sigmoid calibration (per-class OvR, as
 `CalibratedClassifierCV` implements it for multiclass) made things substantially worse
@@ -122,24 +129,104 @@ happens next, and deliberately assert no bank-specific timelines, fees, or limit
 invented policy is worse than a handoff. Swapping in institution-approved wording is a
 content change, not a code change.
 
+## Workflow (M4)
+
+The LangGraph workflow is deliberately boring: one node per job, one conditional edge,
+and a final node that refuses to return an empty response.
+
+```
+                        ┌─ faq ────────────┐
+triage ─────────────────┼─ exchange ───────┤
+  (classify + decide)   ├─ clarify ────────┼─→ compose → END
+                        └─ escalate ───────┘
+```
+
+| Route | Condition | What the user gets |
+|---|---|---|
+| `faq` | confident, curated copy exists | intent-keyed answer + `source: faq` |
+| `exchange_rate` | explicit pair, or confident `exchange_rate` with a pair | dated ECB rate + source URL |
+| `clarify` | low confidence, thin margin, or missing currencies | a question that asserts nothing |
+| `escalate` | fraud/dispute intent, no curated copy, or rate service down | guidance + human handoff |
+
+**A clarification is a real turn, not a dead end.** Passing the same `session_id`
+restores the checkpointed state:
+
+```
+turn 1   "what's the exchange rate?"   → clarify, pending_intent=exchange_rate
+turn 2   "500 USD to EUR"              → exchange_rate, classifier not re-run
+```
+
+The classifier would read `500 USD to EUR` as some unrelated intent; the pending flag is
+what makes the second turn work. Sessions are isolated, anonymous requests delete their
+checkpoint afterwards, and a terse reply (≤6 words) is classified together with the
+previous message so "the virtual one" has context.
+
+**An explicit pair can outrank the classifier, and the evidence says it must.** With the
+real artifact:
+
+| Message | Classifier top-1 | Confidence |
+|---|---|---|
+| `convert 250 EUR to CHF` | `fiat_currency_support` | 0.911 |
+| `how much is 500 dollars in euros?` | `fiat_currency_support` | 0.067 |
+| `what's the rate for GBP to JPY` | `exchange_rate` | 0.384 (below 0.40) |
+
+BANKING77's `exchange_rate` examples are all "what are your rates?" with no pair or
+amount, so slot-filled conversion requests are out of distribution. The router therefore
+treats a complete pair plus a request cue (`convert`, `how much`, `rate`, …) as stronger
+evidence than the classifier's top-1 — but only when no complaint or how-to cue is
+present. `I was charged the wrong rate on a 500 USD to EUR payment` stays a dispute, and
+`I want to exchange USD to EUR in the app` stays an `exchange_via_app` FAQ answer. Fraud
+and dispute intents always win. This is a routing rule, not a model change; M6 measures
+it on a probe set.
+
+**Failures are answers, not exceptions.** The graph never 500s because a tool failed:
+
+| Failure | Behaviour |
+|---|---|
+| Pair not served by Frankfurter | ask for another pair, keep the intent pending, record error |
+| Rate service down | escalate and say the rate was not guessed, record error |
+| FAQ corpus drifts from taxonomy | escalate instead of inventing copy, record error |
+| Whitespace-only input | clarify instead of raising from the vectorizer |
+
+Every degradation lands in `state.errors`, and `route_reason` records *why* a route was
+chosen (`explicit_currency_pair`, `protected_intent`, `ambiguous`, `tool_unavailable`, …)
+so a rule-based override never looks like a confident model decision in an audit.
+
+Live run against the real artifact and the live API (2026-11-16):
+
+```
+how much is 500 dollars in euros?   → 500.00 USD = 453.97 EUR  (explicit pair)
+convert 250 EUR to CHF              → 250.00 EUR = 231.10 CHF  (explicit pair)
+I was charged the wrong exchange…   → escalate, no quote        (protected intent)
+I want to exchange USD to EUR in…   → faq                        (exchange_via_app)
+what's the exchange rate?           → clarify → "500 USD to EUR" → rate
+```
+
+111 tests pass, including all five routes, every degradation path, and the multi-turn
+workflow.
+
 ## What it does
 
 ```
-POST /triage {text}
+POST /triage {text, session_id?}
    │
- triage ── classifier → {intent, confidence, top-3, decision}
+ triage ── classifier → {intent, confidence, top-3}
    │
-   ├── confidence < τ_escalate ──→ clarify (offer top-3 as a question, hand off)
-   ├── intent = exchange_rate ───→ extract base/quote → Frankfurter → compose
-   └── otherwise ───────────────→ curated FAQ for that intent → compose
+   ├── faq        confident + curated copy
+   ├── exchange   explicit pair, or confident exchange intent with a pair
+   ├── clarify    low confidence / thin margin / missing currencies
+   └── escalate   fraud, dispute, no curated copy, or tool failure
+                       │
+                   compose (invariant check) → response
 ```
 
 Routing policy lives in one auditable file, [`taxonomy.py`](src/banking_triage/taxonomy.py):
 
-- Only `exchange_rate` triggers a live rate lookup.
+- `exchange_rate` triggers a live rate lookup; so does an explicit conversion request
+  that names a pair (the M4 rule above).
 - `exchange_charge`, `card_payment_wrong_exchange_rate`,
   `wrong_exchange_rate_for_cash_withdrawal` and friends are *complaints about rates*.
-  Answering them with a quote would be wrong, so they go to the FAQ path.
+  They never go to the tool: they get curated guidance and a human handoff.
 - Fraud and dispute intents (`compromised_card`, `lost_or_stolen_card`,
   `transaction_charged_twice`, …) are never auto-answered, regardless of confidence.
 - FAQ coverage is 42 of 77 intents. The rest get a generic acknowledgement plus a
@@ -195,6 +282,11 @@ artifact is gitignored — it is reproducible from the two commands above.
   through.
 - **Answer provenance.** Every response carries `sources: [{kind, ref}]` pointing at an
   FAQ id or an API URL, so a reviewer can check the answer was retrieved, not invented.
+  The graph also records `route_reason`, so a rule-based route and a model-based route
+  are distinguishable.
+- **Rules may outrank the classifier when the evidence is structural.** Two currencies
+  and an amount are not a lexical hint; they are the request. The override is narrow,
+  cue-guarded, and impossible to trigger for a fraud or dispute intent.
 - **Exchange rates are dated, never "today".** Frankfurter serves ECB reference rates
   on business days only, so answers say "as of 2026-11-13". Implied live quotes would
   be wrong in a way that matters to a bank.
@@ -207,8 +299,8 @@ artifact is gitignored — it is reproducible from the two commands above.
 | M1 — data protocol, baseline classifier | done — 0.8926 test macro-F1 (fit on train) |
 | M2 — calibration, auto-route thresholds | done — 72.1% routed at 96.2% precision |
 | M3 — curated FAQ store, Frankfurter client | done — 42 FAQ entries, live rate verified |
-| M4 — LangGraph workflow + clarification turns | next |
-| M5 — FastAPI surface (`/triage`, `/healthz`, `/model`) | planned |
+| M4 — LangGraph workflow + clarification turns | done — 5 routes, session resume, 111 tests |
+| M5 — FastAPI surface (`/triage`, `/healthz`, `/model`) | next |
 | M6 — evaluation harness (routing, tool calls, latency) | planned |
 | M7 — CI, Docker, Streamlit demo | planned |
 
