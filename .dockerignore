@@ -1,0 +1,21 @@
+# Keep the build context small and the image reproducible.
+.venv/
+venv/
+.git/
+.github/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Regenerated inside the image.
+artifacts/
+reports/
+data/processed/
+data/raw/
+
+# Local noise.
+.env
+Thumbs.db
+.DS_Store
