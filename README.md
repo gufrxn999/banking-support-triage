@@ -472,7 +472,7 @@ own tests, so the suite still runs without Streamlit installed.
 |---|---|
 | `quality` | ruff check/format, stale-metrics check, full test suite on Python 3.11 **and** 3.12 |
 | `reproduce` | installs the lock, rebuilds data/model, evaluates, and fails if the reports differ from the committed ones |
-| `image` | builds the image, asserts `C=16` and `0.54` in `/model`, smoke-tests `/healthz`, `/triage`, `/`, `/static/metrics.json`, and the Streamlit health endpoint |
+| `image` | builds the image, asserts `C=16` and `0.54` in `/model`, smoke-tests `/healthz`, `/triage`, `/`, `/static/metrics.json`, an injected `$PORT`, and the Streamlit health endpoint |
 
 The image job is the container's only validation: Docker is not installed on the
 development machine, so the build either passes in CI or it does not pass at all.

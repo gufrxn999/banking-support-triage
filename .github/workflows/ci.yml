@@ -180,6 +180,19 @@ jobs:
           grep -q "A support triage that" /tmp/index.html
           curl -fsS http://127.0.0.1:8000/static/metrics.json > /tmp/metrics.json
           jq -e '.workflow.n == 3080 and .probes.passed == .probes.total' /tmp/metrics.json
+      - name: Smoke-test an injected PORT
+        run: |
+          set -euo pipefail
+          # Render and Railway assign the port. The image must not hardcode 8000.
+          docker run -d --name triage-port -e PORT=9000 -p 9000:9000 banking-triage:ci
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:9000/healthz > /tmp/health-port.json; then ready=1; break; fi
+            sleep 2
+          done
+          cat /tmp/health-port.json
+          test "$ready" = "1"
+          jq -e '.status == "ok" and .model_loaded == true' /tmp/health-port.json
       - name: Smoke-test the demo server
         run: |
           set -euo pipefail
@@ -196,8 +209,9 @@ jobs:
         if: failure()
         run: |
           docker logs triage || true
+          docker logs triage-port || true
           docker logs demo || true
       - name: Clean up
         if: always()
         run: |
-          docker rm -f triage demo || true
+          docker rm -f triage triage-port demo || true
