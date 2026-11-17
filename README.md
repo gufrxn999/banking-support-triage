@@ -2,6 +2,9 @@
 
 [![CI](https://github.com/gufrxn999/banking-support-triage/actions/workflows/ci.yml/badge.svg)](https://github.com/gufrxn999/banking-support-triage/actions/workflows/ci.yml)
 
+**Live demo:** [banking-support-triage.onrender.com](https://banking-support-triage.onrender.com) ·
+the free instance sleeps when idle, so the first request can take up to a minute.
+
 Turns a free-text banking support message into one of **77 canonical intents**, then
 either answers it from a curated FAQ, answers an exchange-rate question with a live
 ECB reference rate, asks a clarifying question, or escalates to a human — and measures
@@ -506,13 +509,15 @@ assets.
 
 ### Deploy it
 
-The repository includes a Render blueprint ([`render.yaml`](render.yaml)):
+It is deployed at
+[**banking-support-triage.onrender.com**](https://banking-support-triage.onrender.com)
+from the blueprint ([`render.yaml`](render.yaml)):
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/gufrxn999/banking-support-triage)
 
 Render builds the Dockerfile, trains the model during the build, waits for `/healthz`,
 and serves the site at `/`. The free plan is enough for a demo; first builds take a few
-minutes, sleeping instances take a few seconds to wake, and an in-memory clarification
+minutes, sleeping instances take up to a minute to wake, and an in-memory clarification
 session does not survive a restart (the deployment limit noted above).
 
 Any Docker host works the same way. The image honors an injected `$PORT`, so Render,
