@@ -258,8 +258,11 @@ def train_best(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    # These defaults are the grid the committed M1 report was selected from.
+    # `python -m banking_triage.train` must therefore reproduce `C=16`, not a
+    # different model than the one the reports and the container describe.
     parser.add_argument("--configs", default="word_unigram,word_bigram")
-    parser.add_argument("--cs", default="1,2,4,8")
+    parser.add_argument("--cs", default="1,2,4,8,16,32")
     parser.add_argument("--folds", type=int, default=3)
     parser.add_argument("--no-cv", action="store_true", help="skip CV, reuse saved selection")
     parser.add_argument("--no-artifact", action="store_true")

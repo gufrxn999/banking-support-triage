@@ -1,0 +1,11 @@
+# Render blueprint: one Docker service serves the API and the showcase page.
+# The image trains its own model at build time, so no artifact needs uploading.
+services:
+  - type: web
+    name: banking-support-triage
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true

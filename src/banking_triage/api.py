@@ -23,13 +23,15 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from time import perf_counter
 from typing import Annotated
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import __version__
@@ -55,6 +57,10 @@ from .taxonomy import (
 logger = logging.getLogger(__name__)
 
 PROBLEM_MEDIA_TYPE = "application/problem+json"
+
+# The showcase page ships inside the package so one container serves both the
+# API and the site. Static files are mounted, not read per request.
+WEB_DIR = Path(__file__).resolve().parent / "web"
 
 
 @dataclass
@@ -259,6 +265,9 @@ def create_app(
             needs_human=state.needs_human,
             model_version=classifier.model_version,
             latency_ms=latency_ms,
+            currency_query=state.currency_query,
+            steps=state.steps,
+            errors=state.errors,
         )
 
     @app.get("/model", response_model=ModelInfo, tags=["model"])
@@ -296,6 +305,15 @@ def create_app(
             )
             for index, name in enumerate(classifier.label_names)
         ]
+
+    # --- showcase page --------------------------------------------------
+    # Mounted last so /docs, /healthz, and the API routes keep precedence.
+    if WEB_DIR.is_dir():
+        app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
+
+        @app.get("/", include_in_schema=False)
+        def index() -> FileResponse:
+            return FileResponse(WEB_DIR / "index.html")
 
     return app
 

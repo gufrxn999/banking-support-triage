@@ -113,7 +113,34 @@ def test_triage_maps_state_onto_the_response(client: TestClient, graph: StubGrap
     assert body["sources"][0]["kind"] == "faq"
     assert body["model_version"] == "v2-test"
     assert body["latency_ms"] >= 0
+    assert body["steps"] == ["triage", "faq", "compose"]
+    assert body["errors"] == []
+    assert body["currency_query"] is None
     assert graph.calls == [("where is my card", "sess-1")]
+
+
+def test_showcase_page_is_served(client: TestClient) -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "Banking Support Triage" in response.text
+    assert "/static/app.js" in response.text
+
+
+def test_static_assets_and_metrics_are_served(client: TestClient) -> None:
+    css = client.get("/static/styles.css")
+    script = client.get("/static/app.js")
+    metrics = client.get("/static/metrics.json")
+
+    assert css.status_code == 200
+    assert "text/css" in css.headers["content-type"]
+    assert script.status_code == 200
+    assert "javascript" in script.headers["content-type"]
+    assert metrics.status_code == 200
+    payload = metrics.json()
+    assert payload["workflow"]["n"] == 3080
+    assert payload["probes"]["passed"] == payload["probes"]["total"]
 
 
 def test_request_id_is_echoed(client: TestClient) -> None:

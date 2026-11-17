@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-11-16T21:13:43+00:00",
+  "model": {
+    "version": "v2-20261115-1857",
+    "test_accuracy": 0.899,
+    "test_macro_f1": 0.8992,
+    "thresholds": {
+      "confidence": 0.54,
+      "margin": 0.1,
+      "escalate": 0.4
+    }
+  },
+  "workflow": {
+    "n": 3080,
+    "auto_answered": 1147,
+    "coverage": 0.3724,
+    "precision": 0.9512,
+    "correct": 1091,
+    "correct_rate": 0.3542,
+    "clarified": 464,
+    "escalated": 1469,
+    "no_copy": 1033,
+    "protected": 436,
+    "latency": {
+      "p50": 5.79,
+      "p95": 6.87,
+      "p99": 7.91
+    }
+  },
+  "classifier_policy": {
+    "routed": 2220,
+    "coverage": 0.7208,
+    "precision": 0.9622
+  },
+  "probes": {
+    "passed": 24,
+    "total": 24,
+    "turns": 27,
+    "route_accuracy": 1.0,
+    "tool_expected": 8,
+    "tool_correct": 8,
+    "tool_precision": 1.0,
+    "tool_recall": 1.0
+  },
+  "safety": {
+    "predicted_never_auto": 0,
+    "gold_never_auto": 2
+  },
+  "content": {
+    "faq_intents": 42,
+    "total_intents": 77
+  }
+}

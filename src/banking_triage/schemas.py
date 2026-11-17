@@ -104,6 +104,11 @@ class TriageResponse(BaseModel):
     needs_human: bool
     model_version: str
     latency_ms: float
+    # The executed node path and any degradations. Surfaced so a caller (and the
+    # showcase page) can show *how* the answer was produced, not just what it is.
+    currency_query: CurrencyQuery | None = None
+    steps: list[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
 
 
 class ModelInfo(BaseModel):

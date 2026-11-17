@@ -289,10 +289,18 @@ class TriageGraph:
         cue lists in `currency.py` keep complaints and app-how-to questions out.
         """
         explicit = explicit_conversion_request(text)
-        if (
-            explicit is not None
-            and prediction.intent not in NEVER_AUTO_ANSWER_INTENTS
-            and prediction.intent not in CURRENCY_DISPUTE_INTENTS
+        protected = (
+            prediction.intent in NEVER_AUTO_ANSWER_INTENTS
+            or prediction.intent in CURRENCY_DISPUTE_INTENTS
+        )
+        # A protected intent suppresses the structural rule only when the
+        # classifier is actually confident. A weak top-1 on a slot-filled
+        # request is noise -- and the issue this guards against is real: a
+        # small model change put "how much is 500 dollars in euros?" on
+        # `cash_withdrawal_not_recognised` at 0.056, which would otherwise
+        # turn a clear quote request into a low-confidence clarification.
+        if explicit is not None and not (
+            protected and prediction.confidence >= thresholds["escalate_threshold"]
         ):
             return _Choice("exchange_rate", "auto_answer", "explicit_currency_pair", None, explicit)
 

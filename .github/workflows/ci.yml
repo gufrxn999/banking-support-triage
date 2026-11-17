@@ -39,6 +39,8 @@ jobs:
         run: |
           ruff check src tests
           ruff format --check src tests
+      - name: Check showcase metrics
+        run: python -m banking_triage.web_metrics --check
       - name: Test
         run: pytest
 
@@ -54,7 +56,11 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
       - name: Install
-        run: pip install -e .
+        run: |
+          pip install -r requirements.lock
+          pip install -e . --no-deps
+      - name: Snapshot the committed reports
+        run: cp -r reports /tmp/committed-reports
       - name: Rebuild data and model
         run: |
           python -m banking_triage.data
@@ -62,6 +68,76 @@ jobs:
           python -m banking_triage.calibrate
       - name: Evaluate probes and test split
         run: python -m banking_triage.evaluate
+      - name: Check the rebuild against the committed reports
+        run: |
+          python - <<'PY'
+          import json
+          import math
+          import sys
+          from pathlib import Path
+
+          old_dir = Path("/tmp/committed-reports")
+          new_dir = Path("reports")
+          failures: list[str] = []
+
+          def load(root: Path, name: str) -> dict:
+              return json.loads((root / name).read_text(encoding="utf-8"))
+
+          def close(a: float, b: float) -> bool:
+              return math.isclose(a, b, rel_tol=0.0, abs_tol=1e-9)
+
+          m1_old, m1_new = load(old_dir, "m1_classifier.json"), load(new_dir, "m1_classifier.json")
+          for key in ("config", "C"):
+              if m1_old["selected"][key] != m1_new["selected"][key]:
+                  failures.append(
+                      f"m1 selection {key}: {m1_old['selected'][key]!r} -> {m1_new['selected'][key]!r}"
+                  )
+          for split in ("val", "test"):
+              for metric in ("accuracy", "macro_f1", "top3_accuracy"):
+                  if not close(m1_old["final"][split][metric], m1_new["final"][split][metric]):
+                      failures.append(
+                          f"m1 {split} {metric}: "
+                          f"{m1_old['final'][split][metric]} -> {m1_new['final'][split][metric]}"
+                      )
+
+          m2_old, m2_new = load(old_dir, "m2_calibration.json"), load(new_dir, "m2_calibration.json")
+          for key in ("auto_route_threshold", "min_margin"):
+              if not close(m2_old["thresholds"][key], m2_new["thresholds"][key]):
+                  failures.append(
+                      f"m2 threshold {key}: "
+                      f"{m2_old['thresholds'][key]} -> {m2_new['thresholds'][key]}"
+                  )
+          for key in ("accuracy", "macro_f1"):
+              if not close(m2_old["test_scores"][key], m2_new["test_scores"][key]):
+                  failures.append(
+                      f"m2 test {key}: {m2_old['test_scores'][key]} -> {m2_new['test_scores'][key]}"
+                  )
+
+          m6_old, m6_new = load(old_dir, "m6_evaluation.json"), load(new_dir, "m6_evaluation.json")
+          if m6_old["probes"]["passed"] != m6_new["probes"]["passed"]:
+              failures.append(
+                  f"m6 probes passed: {m6_old['probes']['passed']} -> {m6_new['probes']['passed']}"
+              )
+          for key in ("n", "auto_answered", "auto_answer_correct"):
+              if m6_old["test_split"][key] != m6_new["test_split"][key]:
+                  failures.append(
+                      f"m6 test_split {key}: "
+                      f"{m6_old['test_split'][key]} -> {m6_new['test_split'][key]}"
+                  )
+          for key in ("coverage", "precision", "correct_auto_rate"):
+              if not close(m6_old["test_split"][key], m6_new["test_split"][key]):
+                  failures.append(
+                      f"m6 test_split {key}: "
+                      f"{m6_old['test_split'][key]} -> {m6_new['test_split'][key]}"
+                  )
+
+          if failures:
+              print("reproducibility check failed:", file=sys.stderr)
+              for failure in failures:
+                  print(f"  - {failure}", file=sys.stderr)
+              raise SystemExit(1)
+          print("rebuild matches the committed reports")
+          PY
       - name: Upload reports
         uses: actions/upload-artifact@v4
         with:
@@ -97,6 +173,13 @@ jobs:
             -d '{"text":"I would like to change my pin number please"}' > /tmp/triage.json
           cat /tmp/triage.json
           jq -e '.route == "faq" and .sources[0].kind == "faq" and .needs_human == false' /tmp/triage.json
+          curl -fsS http://127.0.0.1:8000/model > /tmp/model.json
+          cat /tmp/model.json
+          jq -e '.hyperparameters.C == 16 and .thresholds.auto_route_threshold == 0.54' /tmp/model.json
+          curl -fsS http://127.0.0.1:8000/ > /tmp/index.html
+          grep -q "A support triage that" /tmp/index.html
+          curl -fsS http://127.0.0.1:8000/static/metrics.json > /tmp/metrics.json
+          jq -e '.workflow.n == 3080 and .probes.passed == .probes.total' /tmp/metrics.json
       - name: Smoke-test the demo server
         run: |
           set -euo pipefail

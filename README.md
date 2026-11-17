@@ -10,10 +10,11 @@ how often each of those outcomes is correct.
 The classifier is a routing signal, not the product. It never writes prose, never
 invents policy, and never claims an intent it is not confident about.
 
-**Status: complete.** M0–M7 are done: measured classifier, routing policy, tools,
-multi-turn workflow, HTTP API, evaluation harness, CI, container image, and a
-Streamlit demo. Every number below is reproducible from the commands in
-[Reproduce](#reproduce); the badge reports the latest CI run.
+**Status: complete.** M0–M8 are done: measured classifier, routing policy, tools,
+multi-turn workflow, HTTP API, evaluation harness, CI, container image, a Streamlit
+demo, and a deployable showcase site served by the same FastAPI app. Every number
+below is reproducible from the commands in [Reproduce](#reproduce); the badge reports
+the latest CI run.
 
 ---
 
@@ -47,7 +48,9 @@ Two findings worth stating plainly:
   mostly add sparse noise. Unigram wins by ~2 macro-F1 points at every `C`.
 - **The `C` grid was extended** because the first pass selected `C=8`, the edge of the
   grid. Re-running with `C ∈ {8, 16, 32}` found an interior optimum at 16. A boundary
-  pick is not a tuned hyperparameter.
+  pick is not a tuned hyperparameter. `python -m banking_triage.train` now defaults to
+  the full grid above, so a clean rebuild selects `C=16`; CI compares the rebuilt
+  reports with the committed ones and fails on any drift.
 
 ## Decision policy (M2)
 
@@ -210,18 +213,21 @@ I want to exchange USD to EUR in…   → faq                        (exchange_v
 what's the exchange rate?           → clarify → "500 USD to EUR" → rate
 ```
 
-The 152 tests all run offline (the model-backed ones skip cleanly when the artifact is
+The 158 tests all run offline (the model-backed ones skip cleanly when the artifact is
 absent), including every route, every degradation path, the multi-turn workflow, the HTTP
-contract, and the evaluation arithmetic.
+contract, the showcase page, and the evaluation arithmetic.
 
 ## HTTP API (M5)
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /triage` | one turn: `{text, session_id?}` → decision, answer, sources, `route_reason`, latency |
+| `GET /` | showcase page: live demo, workflow, measured results, intent explorer |
+| `POST /triage` | one turn: `{text, session_id?}` → decision, answer, sources, `route_reason`, trace, latency |
 | `GET /healthz` | 200 `ok`, or 503 `degraded` when the model or FAQ failed to load |
 | `GET /model` | artifact metadata: version, metrics, thresholds, calibration flag |
 | `GET /intents` | all 77 intents with `faq_covered` and `auto_answerable` flags |
+| `GET /static/*` | page assets: `styles.css`, `app.js`, `metrics.json` |
+| `GET /docs` | OpenAPI schema and interactive try-out |
 
 ```powershell
 uvicorn banking_triage.api:app --port 8000
@@ -241,6 +247,9 @@ Response (abridged):
   "answer": "250.00 EUR = 231.10 CHF at the ECB reference rate for 2026-11-16 ...",
   "sources": [{"kind": "exchange_rate", "ref": "https://api.frankfurter.dev/v1/latest?base=EUR&symbols=CHF"}],
   "needs_human": false,
+  "currency_query": {"base": "EUR", "quote": "CHF", "amount": 250.0},
+  "steps": ["triage", "exchange", "compose"],
+  "errors": [],
   "latency_ms": 278.2
 }
 ```
@@ -260,8 +269,8 @@ Operational behaviour, all covered by tests:
 - **`/triage` is a sync endpoint on purpose.** The classifier is CPU-bound and the
   exchange client is synchronous, so FastAPI's threadpool is the right execution model;
   an async endpoint would block the event loop.
-- **Services are injectable** (`create_app(services=...)`), so the 12 API tests run with
-  no artifact, no FAQ file, and no network. Suite total: 152 tests.
+- **Services are injectable** (`create_app(services=...)`), so the 14 API tests run with
+  no artifact, no FAQ file, and no network. Suite total: 158 tests.
 
 A single request measured ~23 ms for an FAQ answer and ~278 ms for a live rate lookup
 including TLS on a cold connection. M6 measures the distribution over 3,080 turns, with
@@ -408,9 +417,10 @@ python -m banking_triage.data       # official split → data/processed/*.parque
 python -m banking_triage.train      # CV + fit → v1 artifact
 python -m banking_triage.calibrate  # thresholds + refit on train+val → v2 artifact
 python -m banking_triage.evaluate   # probes + test split → reports/m6_evaluation.json
-pytest                              # 152 tests, all offline
+python -m banking_triage.web_metrics  # reports → web/metrics.json (--check in CI)
+pytest                              # 158 tests, all offline
 ruff check src tests
-uvicorn banking_triage.api:app --reload   # docs at http://127.0.0.1:8000/docs
+uvicorn banking_triage.api:app --reload   # site at /, docs at /docs
 
 pip install -e ".[demo]"                  # optional: the Streamlit page
 streamlit run streamlit_app.py            # http://localhost:8501
@@ -423,7 +433,7 @@ artifact is gitignored — it is reproducible from the two commands above.
 
 **Container.** The image trains its own model at build time, so it is self-contained: the
 artifact cannot drift from the code that serves it, and `/healthz` is never degraded
-because someone forgot a build step.
+because someone forgot a build step. It serves both the API and the showcase page at `/`.
 
 ```bash
 docker build -t banking-triage .
@@ -460,12 +470,59 @@ own tests, so the suite still runs without Streamlit installed.
 
 | Job | What it does |
 |---|---|
-| `quality` | ruff check/format + full test suite on Python 3.11 **and** 3.12 |
-| `reproduce` | rebuilds data, trains, calibrates, evaluates; uploads the three reports |
-| `image` | builds the image, then smoke-tests `/healthz`, a `/triage` FAQ call, and the Streamlit health endpoint |
+| `quality` | ruff check/format, stale-metrics check, full test suite on Python 3.11 **and** 3.12 |
+| `reproduce` | installs the lock, rebuilds data/model, evaluates, and fails if the reports differ from the committed ones |
+| `image` | builds the image, asserts `C=16` and `0.54` in `/model`, smoke-tests `/healthz`, `/triage`, `/`, `/static/metrics.json`, and the Streamlit health endpoint |
 
 The image job is the container's only validation: Docker is not installed on the
 development machine, so the build either passes in CI or it does not pass at all.
+
+## Showcase website (M8)
+
+The site is part of the application, not a separate frontend deployment. FastAPI serves
+it at `/` from [`src/banking_triage/web/`](src/banking_triage/web/), and the page calls
+the public `/triage` endpoint documented above. One container, one URL, no CDN, no build
+step, no API key.
+
+The demo is interactive rather than a recording:
+
+- typing a message (or picking an example) sends it to the live workflow;
+- every answer carries the route, intent, confidence, and measured latency;
+- the trace panel reconstructs the turn from the response: the top-3 classifier scores
+  against the real threshold, the decision and `route_reason` in plain language, the
+  tool call (`currency_query`), sources, degraded-tool errors, and executed `steps`;
+- the session supports clarification: `what's the exchange rate?` followed by
+  `500 USD to EUR` resolves the follow-up without re-classifying it;
+- all 77 intents are browsable, with filters for curated copy, human-only, and no copy;
+- health, model version, and serving thresholds come from `/healthz` and `/model`;
+- the headline figures load from `/static/metrics.json`, which is generated from the
+  committed reports by `python -m banking_triage.web_metrics`; CI fails if it is stale.
+
+Browser-verified against the local API: an FAQ turn (`change_pin` at 0.97), a dated
+quote (250 EUR = 231.10 CHF as of 2026-11-16), a missing-pair clarification followed by
+a bare `500 USD to EUR`, and the intent search/filter counts (77 / 42 / 12 / 35). The
+client inserts API text with `textContent`, and the app serves only its own static
+assets.
+
+### Deploy it
+
+The repository includes a Render blueprint ([`render.yaml`](render.yaml)):
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/gufrxn999/banking-support-triage)
+
+Render builds the Dockerfile, trains the model during the build, waits for `/healthz`,
+and serves the site at `/`. The free plan is enough for a demo; first builds take a few
+minutes, sleeping instances take a few seconds to wake, and an in-memory clarification
+session does not survive a restart (the deployment limit noted above).
+
+Any Docker host works the same way. The image honors an injected `$PORT`, so Render,
+Railway, Fly, or a plain VM can assign the port:
+
+```bash
+docker build -t banking-triage .
+docker run --rm -e PORT=8000 -p 8000:8000 banking-triage
+# site http://localhost:8000/ · docs http://localhost:8000/docs
+```
 
 ## Design decisions
 
@@ -484,8 +541,8 @@ development machine, so the build either passes in CI or it does not pass at all
   The graph also records `route_reason`, so a rule-based route and a model-based route
   are distinguishable.
 - **Rules may outrank the classifier when the evidence is structural.** Two currencies
-  and an amount are not a lexical hint; they are the request. The override is narrow,
-  cue-guarded, and impossible to trigger for a fraud or dispute intent.
+  and an amount are not a lexical hint; they are the request. The override is narrow and
+  cue-guarded, and a *confident* fraud or dispute prediction still suppresses it.
 - **The reported number is the shipped one.** The 72.1% classifier policy is a ceiling;
   M6 measures what the workflow actually answers (37.2%) and decomposes the rest. Quoting
   the higher number as the product's deflection rate would be the easiest lie to tell
@@ -493,9 +550,14 @@ development machine, so the build either passes in CI or it does not pass at all
 - **Exchange rates are dated, never "today".** Frankfurter serves ECB reference rates
   on business days only, so answers say "as of 2026-11-13". Implied live quotes would
   be wrong in a way that matters to a bank.
-- **The demo and the image do not re-implement the workflow.** The Streamlit page calls
-  the same `TriageGraph`, and the image trains the artifact it serves. There is one code
-  path, and CI exercises it through the container.
+- **The demo, the website, and the image do not re-implement the workflow.** The
+  Streamlit page and the showcase client call the same `TriageGraph`/API, and the image
+  trains the artifact it serves. There is one code path, and CI exercises it through the
+  container.
+- **The website is a client, not a mock.** Every answer on the page is a real API
+  response with its executed `steps`; there is no canned response path that can drift
+  from the backend. Its evidence block is generated from the reports, and CI rejects a
+  stale copy.
 
 ## Roadmap
 
@@ -509,6 +571,7 @@ development machine, so the build either passes in CI or it does not pass at all
 | M5 — FastAPI surface (`/triage`, `/healthz`, `/model`, `/intents`) | done — problem details, injectable services |
 | M6 — evaluation harness (routing, tool calls, latency) | done — 24/24 probes, 37.2% at 95.1% |
 | M7 — CI, Docker, Streamlit demo | done — CI matrix, image smoke tests, browser-verified demo |
+| M8 — showcase website, deployment config | done — FastAPI-served interactive site, Render blueprint, container smoke tests |
 
 The headline number the project exists to produce is now measured: **deflection rate at a
 stated precision, and the gap between what the classifier can support (72.1%) and what

@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Banking Support Triage — a routing workflow that shows its work</title>
+  <meta name="description" content="BANKING77 intent classifier, policy routing, curated answers, dated ECB rates, and human handoff. Interactive demo with measured results." />
+  <meta name="theme-color" content="#070b0d" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e161a'/%3E%3Cpath d='M18 40V26m0 0 14-8 14 8m-28 0h28M24 40v-8m8 8v-8m8 8v-8M18 46h28' stroke='%233ddc97' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav" id="top">
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="Banking Support Triage home">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="14" fill="none" stroke="currentColor" stroke-width="3" />
+          <path d="M18 40V26m0 0 14-8 14 8m-28 0h28M24 40v-8m8 8v-8m8 8v-8M18 46h28"
+                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>banking<span class="brand-slash">/</span>triage</span>
+      </a>
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#demo">Demo</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#results">Results</a>
+        <a href="#intents">Intents</a>
+        <a href="#api">API</a>
+      </nav>
+      <div class="nav-actions">
+        <span class="health-pill" id="health-pill" title="Backend health">
+          <span class="health-dot"></span><span id="health-text">checking</span>
+        </span>
+        <a class="btn btn-ghost btn-small" href="https://github.com/gufrxn999/banking-support-triage"
+           target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ---------------------------------------------------------------- hero -->
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-dot"></span>BANKING77 · 77 intents · measured policy</p>
+        <h1>A support triage that <span class="grad">shows its work.</span></h1>
+        <p class="lede">
+          One message in. One decision out: answer from reviewed copy, quote a dated ECB
+          reference rate, ask a clarifying question, or hand off. Every turn exposes the
+          classifier, the policy, and the source behind it.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#demo">Try the live demo</a>
+          <a class="btn btn-ghost" href="#results">See the measurements</a>
+        </div>
+        <p class="fineprint">No LLM in the loop · deterministic routing · falsifiable evaluation</p>
+      </div>
+
+      <div class="hero-card" aria-hidden="true">
+        <div class="hc-head">
+          <span class="hc-dot"></span>
+          <span>trace preview</span>
+          <span class="hc-endpoint">POST /triage</span>
+        </div>
+        <div class="hc-body">
+          <p class="hc-msg">“convert 250 EUR to CHF”</p>
+          <div class="hc-stage">
+            <span class="hc-label">classify</span>
+            <span class="hc-intent">fiat_currency_support</span>
+            <span class="hc-bar"><i style="width: 91%"></i></span>
+            <b class="hc-score">0.91</b>
+          </div>
+          <div class="hc-stage">
+            <span class="hc-label">route</span>
+            <span class="tag tag-green">exchange_rate</span>
+            <span class="hc-note">explicit currency pair</span>
+          </div>
+          <div class="hc-quote">
+            <span class="hc-amount">250.00 EUR</span>
+            <span class="hc-eq">=</span>
+            <span class="hc-amount">231.10 CHF</span>
+          </div>
+          <p class="hc-foot">ECB reference · 2026-11-16 · 1 EUR = 0.9244 CHF</p>
+          <div class="hc-source">
+            <span class="hc-label">source</span>
+            <code>frankfurter.dev</code>
+            <span class="hc-latency">5.8 ms workflow</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------- kpis -->
+    <section class="kpis" aria-label="Headline measurements">
+      <div class="kpi">
+        <span class="kpi-label">Auto-answered</span>
+        <span class="kpi-value" id="kpi-coverage">—</span>
+        <span class="kpi-note">shipped workflow, 3,080 held-out messages</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Precision on those</span>
+        <span class="kpi-value" id="kpi-precision">—</span>
+        <span class="kpi-note">correct intent, not just an answer</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Policy probes</span>
+        <span class="kpi-value" id="kpi-probes">—</span>
+        <span class="kpi-note">hand-written cases over 27 turns</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Workflow latency</span>
+        <span class="kpi-value" id="kpi-latency">—</span>
+        <span class="kpi-note">p50 in-process, network excluded</span>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------- live demo -->
+    <section class="section" id="demo">
+      <div class="section-head">
+        <p class="eyebrow"><span class="eyebrow-dot"></span>Live demo</p>
+        <h2>Talk to the workflow</h2>
+        <p class="section-sub">
+          This is the real API, not a recording. The trace panel reconstructs the turn:
+          what the classifier predicted, why the router chose the action, which tool ran,
+          and where the words came from.
+        </p>
+      </div>
+
+      <div class="demo-grid">
+        <div class="panel chat-panel">
+          <div class="panel-head">
+            <div class="panel-title">
+              <span class="status-dot" id="chat-dot"></span>
+              Session <code id="session-label">—</code>
+            </div>
+            <button class="btn btn-small btn-ghost" id="new-chat" type="button">New conversation</button>
+          </div>
+
+          <div class="chat-log" id="chat-log" aria-live="polite" aria-label="Conversation">
+            <div class="chat-empty" id="chat-empty">
+              <p class="chat-empty-title">Start with an example</p>
+              <div class="chips" id="example-chips"></div>
+              <p class="hint">Or type your own message below.</p>
+            </div>
+          </div>
+
+          <form class="chat-form" id="chat-form">
+            <label class="sr-only" for="chat-input">Your message</label>
+            <textarea id="chat-input" rows="1" maxlength="2000" required
+                      placeholder="I was charged the wrong rate on a 500 USD to EUR payment"></textarea>
+            <button class="send" id="send" type="submit" aria-label="Send message">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14m0 0-6-6m6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </form>
+          <p class="hint chat-hint">Enter to send · Shift + Enter for a new line · sessions live in memory</p>
+        </div>
+
+        <aside class="panel trace-panel" aria-label="Workflow trace">
+          <div class="panel-head">
+            <div class="panel-title">Workflow trace</div>
+            <span class="pill pill-muted" id="trace-turn">no turn yet</span>
+          </div>
+          <div class="trace" id="trace">
+            <div class="trace-empty">
+              <svg viewBox="0 0 64 64" aria-hidden="true" class="trace-empty-icon">
+                <path d="M14 20h20m-20 12h36M14 44h26" fill="none" stroke="currentColor"
+                      stroke-width="2.5" stroke-linecap="round" />
+                <circle cx="46" cy="20" r="5" fill="none" stroke="currentColor" stroke-width="2.5" />
+              </svg>
+              <p>Send a message to see the classifier, the route decision, the action, and the answer's provenance.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------ workflow -->
+    <section class="section" id="workflow">
+      <div class="section-head">
+        <p class="eyebrow"><span class="eyebrow-dot"></span>The policy</p>
+        <h2>One classifier, four honest outcomes</h2>
+        <p class="section-sub">
+          The classifier is a routing signal, not the product. It never writes prose and
+          never overrides the safety policy. Routing lives in one auditable module.
+        </p>
+      </div>
+
+      <div class="flow" aria-label="Workflow pipeline">
+        <div class="flow-node">
+          <span class="flow-step">01</span>
+          <strong>Message</strong>
+          <span>free text, ≤ 2,000 chars</span>
+        </div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="flow-node">
+          <span class="flow-step">02</span>
+          <strong>Classify</strong>
+          <span>TF-IDF + logistic regression</span>
+        </div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="flow-node">
+          <span class="flow-step">03</span>
+          <strong>Decide</strong>
+          <span>confidence + margin + policy</span>
+        </div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="flow-node flow-node-wide">
+          <span class="flow-step">04</span>
+          <strong>Act &amp; compose</strong>
+          <span>FAQ · rate · clarify · handoff</span>
+        </div>
+      </div>
+
+      <div class="route-grid">
+        <article class="route-card route-faq">
+          <div class="route-top">
+            <span class="tag tag-green">faq</span>
+            <span class="route-decision">auto_answer</span>
+          </div>
+          <h3>Answer from reviewed copy</h3>
+          <p>
+            Fires when confidence ≥ 0.54, the top-1/top-2 margin is ≥ 0.10, and the
+            predicted intent has curated copy. The answer is retrieved, never generated.
+          </p>
+          <p class="route-src">source: <code>faq.jsonl</code> · 42 of 77 intents</p>
+        </article>
+
+        <article class="route-card route-rate">
+          <div class="route-top">
+            <span class="tag tag-cyan">exchange_rate</span>
+            <span class="route-decision">auto_answer</span>
+          </div>
+          <h3>Quote a dated ECB rate</h3>
+          <p>
+            Fires for the exchange-rate intent with a usable pair, or for an explicit
+            conversion request that names two currencies and an amount. ECB reference
+            rates only — never “today”, never a guess at a missing pair.
+          </p>
+          <p class="route-src">source: <code>frankfurter.dev</code> · business-day rates</p>
+        </article>
+
+        <article class="route-card route-clarify">
+          <div class="route-top">
+            <span class="tag tag-amber">clarify</span>
+            <span class="route-decision">clarify</span>
+          </div>
+          <h3>Ask instead of guessing</h3>
+          <p>
+            Fires below the confidence floor, on a thin margin, or when a rate question is
+            missing half a pair. Multi-turn state remembers the pending intent, so the next
+            reply can complete the request without re-classifying it.
+          </p>
+          <p class="route-src">state: LangGraph checkpointer · in-memory</p>
+        </article>
+
+        <article class="route-card route-escalate">
+          <div class="route-top">
+            <span class="tag tag-red">escalate</span>
+            <span class="route-decision">escalate</span>
+          </div>
+          <h3>Hand off to a person</h3>
+          <p>
+            Fraud and dispute intents never auto-answer, at any confidence. A confident
+            intent without reviewed copy also escalates: improvising policy is worse than a
+            ticket. Tool failures degrade into this path, with the error recorded.
+          </p>
+          <p class="route-src">guardrail: <code>NEVER_AUTO_ANSWER_INTENTS</code></p>
+        </article>
+      </div>
+
+      <div class="policy-strip">
+        <div><span class="policy-k">confidence</span><code>≥ 0.54</code></div>
+        <div><span class="policy-k">margin</span><code>≥ 0.10</code></div>
+        <div><span class="policy-k">protected intents</span><code>never auto-answered</code></div>
+        <div><span class="policy-k">FAQ coverage</span><code>42 / 77 intents</code></div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------- results -->
+    <section class="section" id="results">
+      <div class="section-head">
+        <p class="eyebrow"><span class="eyebrow-dot"></span>Evidence</p>
+        <h2>Measured, not asserted</h2>
+        <p class="section-sub">
+          Two numbers are reported side by side because they answer different questions:
+          what the classifier can support, and what the shipped workflow actually resolves.
+        </p>
+      </div>
+
+      <div class="result-grid">
+        <article class="panel result-card">
+          <div class="result-head">
+            <h3>Shipped workflow</h3>
+            <span class="pill pill-green">3,080 test messages</span>
+          </div>
+          <div class="outcome-list" id="outcome-list">
+            <div class="outcome"><span>Auto-answered</span><b id="out-auto">—</b></div>
+            <div class="outcome"><span>— of which correct</span><b id="out-correct">—</b></div>
+            <div class="outcome"><span>Clarified</span><b id="out-clarify">—</b></div>
+            <div class="outcome"><span>Escalated · no reviewed copy</span><b id="out-nocopy">—</b></div>
+            <div class="outcome"><span>Escalated · protected intent</span><b id="out-protected">—</b></div>
+          </div>
+          <p class="result-foot">
+            Precision on auto-answered traffic: <b id="out-precision">—</b>. A wrong answer
+            that is still on-topic is counted as wrong.
+          </p>
+        </article>
+
+        <article class="panel result-card">
+          <div class="result-head">
+            <h3>Classifier ceiling</h3>
+            <span class="pill pill-cyan">policy without content limits</span>
+          </div>
+          <div class="big-stat">
+            <span class="big-value" id="ceiling-coverage">—</span>
+            <span class="big-label">of test traffic is classifiable at the safety thresholds</span>
+          </div>
+          <div class="meter" aria-hidden="true"><i id="ceiling-meter" style="width: 0%"></i></div>
+          <div class="stat-row">
+            <div><span>Precision</span><b id="ceiling-precision">—</b></div>
+            <div><span>Test macro-F1</span><b id="ceiling-f1">—</b></div>
+            <div><span>Test accuracy</span><b id="ceiling-acc">—</b></div>
+          </div>
+          <p class="result-foot">
+            Gap to the shipped workflow is unreviewed content, not model quality — the
+            classifier is the same in both measurements.
+          </p>
+        </article>
+      </div>
+
+      <div class="result-grid">
+        <article class="panel result-card">
+          <div class="result-head">
+            <h3>Policy probes</h3>
+            <span class="pill pill-green" id="probe-pill">—</span>
+          </div>
+          <p class="result-foot">
+            Hand-written messages for behaviour BANKING77 cannot express: slot-filled
+            conversions, spoken currency aliases, fee questions naming a pair, a rate
+            complaint naming both a pair and an amount, an unsupported currency, and
+            clarification sessions.
+          </p>
+          <div class="stat-row stat-row-4">
+            <div><span>Route accuracy</span><b id="probe-routes">—</b></div>
+            <div><span>Tool calls</span><b id="probe-calls">—</b></div>
+            <div><span>Tool precision</span><b id="probe-precision">—</b></div>
+            <div><span>Tool recall</span><b id="probe-recall">—</b></div>
+          </div>
+        </article>
+
+        <article class="panel result-card">
+          <div class="result-head">
+            <h3>Safety &amp; speed</h3>
+            <span class="pill pill-muted">same run</span>
+          </div>
+          <div class="stat-row stat-row-3">
+            <div><span>p50 latency</span><b id="lat-p50">—</b></div>
+            <div><span>p95 latency</span><b id="lat-p95">—</b></div>
+            <div><span>p99 latency</span><b id="lat-p99">—</b></div>
+          </div>
+          <ul class="safety-list">
+            <li><b id="safe-predicted">—</b> auto-answered messages had a predicted protected intent.</li>
+            <li><b id="safe-gold">—</b> had a gold protected label but were confused with a safe neighbour; both are listed in the report.</li>
+            <li>No LLM: the same input always produces the same answer.</li>
+          </ul>
+          <p class="result-foot">In-process graph invocation, single thread, exchange stubbed.</p>
+        </article>
+      </div>
+
+      <div class="caveat">
+        <h3>Why not quote the higher number?</h3>
+        <p>
+          The classifier policy can route <b id="caveat-ceiling">—</b> of test traffic at
+          <b id="caveat-precision">—</b> precision — but that counts any confident intent as
+          routable, whether or not a reviewed answer exists. The workflow only answers intents
+          with curated copy, so it resolves <b id="caveat-workflow">—</b>. The difference is a
+          content roadmap with a measurable ceiling, and the report states it instead of hiding it.
+        </p>
+        <div class="caveat-links">
+          <a class="text-link" href="https://github.com/gufrxn999/banking-support-triage/blob/main/reports/m6_evaluation.json"
+             target="_blank" rel="noopener">Evaluation report <span aria-hidden="true">↗</span></a>
+          <a class="text-link" href="https://github.com/gufrxn999/banking-support-triage#evaluation-m6"
+             target="_blank" rel="noopener">Method notes <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------- intents -->
+    <section class="section" id="intents">
+      <div class="section-head">
+        <p class="eyebrow"><span class="eyebrow-dot"></span>The taxonomy</p>
+        <h2>Browse the 77 intents</h2>
+        <p class="section-sub">
+          Every label comes from BANKING77. Filter to see which intents have reviewed copy,
+          which are protected by policy, and which confidently escalate because no copy
+          exists yet.
+        </p>
+      </div>
+
+      <div class="intent-controls">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <label class="sr-only" for="intent-search">Filter intents</label>
+          <input id="intent-search" type="search" placeholder="Filter by name…" autocomplete="off" />
+        </div>
+        <div class="chips" id="intent-filters" role="group" aria-label="Intent filters"></div>
+        <span class="intent-count" id="intent-count">loading…</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="intent-table">
+          <thead>
+            <tr><th scope="col">#</th><th scope="col">Intent</th><th scope="col">Curated copy</th><th scope="col">Auto-answerable</th></tr>
+          </thead>
+          <tbody id="intent-body">
+            <tr><td colspan="4" class="table-empty">Loading intents…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------- api -->
+    <section class="section" id="api">
+      <div class="section-head">
+        <p class="eyebrow"><span class="eyebrow-dot"></span>Interface</p>
+        <h2>A small, documented API</h2>
+        <p class="section-sub">
+          The page is a client of the same public endpoints. Errors are RFC 9457 problem
+          documents, every response carries a request ID, and a missing model degrades
+          <code>/healthz</code> instead of crashing the process.
+        </p>
+      </div>
+
+      <div class="api-grid">
+        <div class="panel code-panel">
+          <div class="panel-head">
+            <div class="panel-title"><span class="code-dot"></span> <code>POST /triage</code></div>
+            <button class="btn btn-small btn-ghost" id="copy-curl" type="button">Copy</button>
+          </div>
+          <pre class="code-block"><code id="curl-code">curl -s http://127.0.0.1:8000/triage \
+  -H 'content-type: application/json' \
+  -d '{"text": "convert 250 EUR to CHF"}'</code></pre>
+          <div class="code-divider"></div>
+          <pre class="code-block code-response" id="api-sample"><code>{
+  "intent": "fiat_currency_support",
+  "confidence": 0.9112,
+  "route": "exchange_rate",
+  "decision": "auto_answer",
+  "route_reason": "explicit_currency_pair",
+  "answer": "250.00 EUR = 231.10 CHF at the ECB reference rate …",
+  "sources": [{ "kind": "exchange_rate", "ref": "https://api.frankfurter.dev/…" }],
+  "needs_human": false,
+  "steps": ["triage", "exchange", "compose"],
+  "latency_ms": 6.1
+}</code></pre>
+          <p class="hint">Shape illustrates a real response; the live values come from the demo above.</p>
+        </div>
+
+        <div class="panel endpoints">
+          <div class="panel-head"><div class="panel-title">Endpoints</div></div>
+          <ul class="endpoint-list">
+            <li><code class="method method-post">POST</code><code>/triage</code><span>Classify, route, act, compose</span></li>
+            <li><code class="method method-get">GET</code><code>/healthz</code><span>Liveness + model status</span></li>
+            <li><code class="method method-get">GET</code><code>/model</code><span>Version, thresholds, metrics</span></li>
+            <li><code class="method method-get">GET</code><code>/intents</code><span>77 labels + coverage flags</span></li>
+            <li><code class="method method-get">GET</code><code>/docs</code><span>OpenAPI + interactive try-out</span></li>
+          </ul>
+          <a class="btn btn-primary btn-block" href="/docs" target="_blank" rel="noopener">Open the API docs <span aria-hidden="true">↗</span></a>
+          <div class="api-meta">
+            <div><span>Model</span><code id="model-version">—</code></div>
+            <div><span>Trained on</span><code id="model-trained">—</code></div>
+            <div><span>Vectorizer</span><code id="model-vectorizer">—</code></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <p class="footer-brand">banking<span class="brand-slash">/</span>triage</p>
+        <p class="footer-note">
+          Reference implementation over public BANKING77 data. Not a bank, not financial
+          advice. FAQ entries are drafts awaiting policy review; rates are ECB reference
+          rates, never live quotes. No account data is collected.
+        </p>
+      </div>
+      <div class="footer-meta">
+        <a href="https://github.com/gufrxn999/banking-support-triage" target="_blank" rel="noopener">Source</a>
+        <a href="https://github.com/gufrxn999/banking-support-triage/blob/main/LICENSE" target="_blank" rel="noopener">MIT license</a>
+        <a href="https://github.com/PolyAI-LDN/task-specific-datasets" target="_blank" rel="noopener">BANKING77 · CC BY 4.0</a>
+        <span id="footer-model">—</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

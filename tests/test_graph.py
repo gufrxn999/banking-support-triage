@@ -137,6 +137,39 @@ def test_complaint_with_a_pair_is_not_turned_into_a_quote(faq: FAQStore) -> None
     assert state.route_reason == "protected_intent"
 
 
+def test_a_weak_protected_prediction_does_not_block_an_explicit_quote(faq: FAQStore) -> None:
+    # Regression: a smaller C put this text on `cash_withdrawal_not_recognised`
+    # at 0.056. A weak guess must not turn a slot-filled conversion request into
+    # a clarification; the pair and amount are the request.
+    exchange = StubExchange()
+    graph = build(
+        lambda text: prediction(
+            "cash_withdrawal_not_recognised", 0.056, ("fiat_currency_support", 0.052)
+        ),
+        faq,
+        exchange,
+    )
+
+    state = graph.invoke("how much is 500 dollars in euros?")
+
+    assert exchange.calls == [("USD", "EUR")]
+    assert state.route == "exchange_rate"
+    assert state.route_reason == "explicit_currency_pair"
+
+
+def test_a_confident_protected_prediction_still_blocks_an_explicit_pair(faq: FAQStore) -> None:
+    # The converse guard: if the classifier is sure this is fraud or a dispute,
+    # a pair in the text does not turn the turn into a rate quote.
+    exchange = StubExchange()
+    graph = build(lambda text: prediction("compromised_card", 0.78), faq, exchange)
+
+    state = graph.invoke("convert 500 USD to EUR")
+
+    assert exchange.calls == []
+    assert state.route == "escalate"
+    assert state.route_reason == "protected_intent"
+
+
 def test_app_how_to_question_with_a_pair_keeps_its_faq_route(faq: FAQStore) -> None:
     exchange = StubExchange()
     graph = build(lambda text: prediction("exchange_via_app", 0.60), faq, exchange)
